@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Primary School Learning Hub API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: subjects
+    description: Learning subjects
+  - name: questions
+    description: Quiz questions
+  - name: scores
+    description: Scores and leaderboard
+  - name: facts
+    description: Fun facts
 paths:
   /healthz:
     get:
@@ -24,6 +31,144 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /subjects:
+    get:
+      operationId: listSubjects
+      tags: [subjects]
+      summary: List all subjects
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+
+  /questions:
+    get:
+      operationId: listQuestions
+      tags: [questions]
+      summary: Get quiz questions
+      parameters:
+        - name: subjectId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [easy, medium, hard]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+
+  /scores:
+    get:
+      operationId: listScores
+      tags: [scores]
+      summary: Get leaderboard scores
+      parameters:
+        - name: subjectId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leaderboard scores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Score"
+    post:
+      operationId: submitScore
+      tags: [scores]
+      summary: Submit a quiz score
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScoreInput"
+      responses:
+        "201":
+          description: Score saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Score"
+
+  /facts/random:
+    get:
+      operationId: getRandomFact
+      tags: [facts]
+      summary: Get a random fun fact
+      parameters:
+        - name: subjectId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A fun fact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fact"
+
+  /facts:
+    get:
+      operationId: listFacts
+      tags: [facts]
+      summary: List fun facts
+      responses:
+        "200":
+          description: List of facts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Fact"
+
+  /stats:
+    get:
+      operationId: getStats
+      tags: [scores]
+      summary: Get overall learning stats
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +179,107 @@ components:
       required:
         - status
 
+    Subject:
+      type: object
+      required: [id, name, description, emoji, color, questionCount]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        emoji:
+          type: string
+        color:
+          type: string
+        questionCount:
+          type: integer
+
+    Question:
+      type: object
+      required: [id, subjectId, subjectName, text, options, correctIndex, difficulty, explanation]
+      properties:
+        id:
+          type: integer
+        subjectId:
+          type: integer
+        subjectName:
+          type: string
+        text:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctIndex:
+          type: integer
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        explanation:
+          type: string
+
+    Score:
+      type: object
+      required: [id, playerName, subjectId, subjectName, score, totalQuestions, percentage, createdAt]
+      properties:
+        id:
+          type: integer
+        playerName:
+          type: string
+        subjectId:
+          type: integer
+        subjectName:
+          type: string
+        score:
+          type: integer
+        totalQuestions:
+          type: integer
+        percentage:
+          type: integer
+        createdAt:
+          type: string
+
+    ScoreInput:
+      type: object
+      required: [playerName, subjectId, score, totalQuestions]
+      properties:
+        playerName:
+          type: string
+          minLength: 1
+          maxLength: 30
+        subjectId:
+          type: integer
+        score:
+          type: integer
+        totalQuestions:
+          type: integer
+
+    Fact:
+      type: object
+      required: [id, subjectId, subjectName, text, emoji]
+      properties:
+        id:
+          type: integer
+        subjectId:
+          type: integer
+        subjectName:
+          type: string
+        text:
+          type: string
+        emoji:
+          type: string
+
+    Stats:
+      type: object
+      required: [totalQuizzesTaken, totalPlayersToday, averageScore, totalFacts]
+      properties:
+        totalQuizzesTaken:
+          type: integer
+        totalPlayersToday:
+          type: integer
+        averageScore:
+          type: integer
+        totalFacts:
+          type: integer
