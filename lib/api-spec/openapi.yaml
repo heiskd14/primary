@@ -2,28 +2,27 @@ openapi: 3.1.0
 info:
   title: Api
   version: 0.1.0
-  description: Primary School Learning Hub API
+  description: Primary School Website API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
-  - name: subjects
-    description: Learning subjects
-  - name: questions
-    description: Quiz questions
-  - name: scores
-    description: Scores and leaderboard
-  - name: facts
-    description: Fun facts
+  - name: news
+    description: News articles
+  - name: events
+    description: School events
+  - name: staff
+    description: Staff members
+  - name: gallery
+    description: Photo gallery
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -32,142 +31,137 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
-  /subjects:
+  /news:
     get:
-      operationId: listSubjects
-      tags: [subjects]
-      summary: List all subjects
-      responses:
-        "200":
-          description: List of subjects
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Subject"
-
-  /questions:
-    get:
-      operationId: listQuestions
-      tags: [questions]
-      summary: Get quiz questions
+      operationId: listNews
+      tags: [news]
+      summary: List news articles
       parameters:
-        - name: subjectId
+        - name: limit
           in: query
           required: false
           schema:
             type: integer
-        - name: difficulty
+        - name: category
           in: query
           required: false
           schema:
             type: string
-            enum: [easy, medium, hard]
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
       responses:
         "200":
-          description: List of questions
+          description: List of news articles
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Question"
-
-  /scores:
-    get:
-      operationId: listScores
-      tags: [scores]
-      summary: Get leaderboard scores
-      parameters:
-        - name: subjectId
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Leaderboard scores
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Score"
+                  $ref: "#/components/schemas/NewsArticle"
     post:
-      operationId: submitScore
-      tags: [scores]
-      summary: Submit a quiz score
+      operationId: createNews
+      tags: [news]
+      summary: Create a news article
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ScoreInput"
+              $ref: "#/components/schemas/NewsArticleInput"
       responses:
         "201":
-          description: Score saved
+          description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Score"
+                $ref: "#/components/schemas/NewsArticle"
 
-  /facts/random:
+  /news/{id}:
     get:
-      operationId: getRandomFact
-      tags: [facts]
-      summary: Get a random fun fact
+      operationId: getNews
+      tags: [news]
+      summary: Get a news article
       parameters:
-        - name: subjectId
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: News article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewsArticle"
+        "404":
+          description: Not found
+
+  /events:
+    get:
+      operationId: listEvents
+      tags: [events]
+      summary: List upcoming events
+      parameters:
+        - name: limit
           in: query
           required: false
           schema:
             type: integer
       responses:
         "200":
-          description: A fun fact
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Fact"
-
-  /facts:
-    get:
-      operationId: listFacts
-      tags: [facts]
-      summary: List fun facts
-      responses:
-        "200":
-          description: List of facts
+          description: List of events
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Fact"
+                  $ref: "#/components/schemas/SchoolEvent"
 
-  /stats:
+  /staff:
     get:
-      operationId: getStats
-      tags: [scores]
-      summary: Get overall learning stats
+      operationId: listStaff
+      tags: [staff]
+      summary: List staff members
+      parameters:
+        - name: department
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
-          description: Stats summary
+          description: List of staff
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Stats"
+                type: array
+                items:
+                  $ref: "#/components/schemas/StaffMember"
+
+  /gallery:
+    get:
+      operationId: listGallery
+      tags: [gallery]
+      summary: List gallery items
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Gallery items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryItem"
 
 components:
   schemas:
@@ -179,107 +173,93 @@ components:
       required:
         - status
 
-    Subject:
+    NewsArticle:
       type: object
-      required: [id, name, description, emoji, color, questionCount]
+      required: [id, title, excerpt, content, category, author, imageUrl, publishedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        author:
+          type: string
+        imageUrl:
+          type: string
+        publishedAt:
+          type: string
+
+    NewsArticleInput:
+      type: object
+      required: [title, excerpt, content, category, author, imageUrl]
+      properties:
+        title:
+          type: string
+        excerpt:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        author:
+          type: string
+        imageUrl:
+          type: string
+
+    SchoolEvent:
+      type: object
+      required: [id, title, description, date, time, location, category]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+        location:
+          type: string
+        category:
+          type: string
+
+    StaffMember:
+      type: object
+      required: [id, name, role, department, bio, photoUrl, displayOrder]
       properties:
         id:
           type: integer
         name:
           type: string
-        description:
+        role:
           type: string
-        emoji:
+        department:
           type: string
-        color:
+        bio:
           type: string
-        questionCount:
+        photoUrl:
+          type: string
+        displayOrder:
           type: integer
 
-    Question:
+    GalleryItem:
       type: object
-      required: [id, subjectId, subjectName, text, options, correctIndex, difficulty, explanation]
+      required: [id, title, imageUrl, category, createdAt]
       properties:
         id:
           type: integer
-        subjectId:
-          type: integer
-        subjectName:
+        title:
           type: string
-        text:
+        imageUrl:
           type: string
-        options:
-          type: array
-          items:
-            type: string
-        correctIndex:
-          type: integer
-        difficulty:
+        category:
           type: string
-          enum: [easy, medium, hard]
-        explanation:
-          type: string
-
-    Score:
-      type: object
-      required: [id, playerName, subjectId, subjectName, score, totalQuestions, percentage, createdAt]
-      properties:
-        id:
-          type: integer
-        playerName:
-          type: string
-        subjectId:
-          type: integer
-        subjectName:
-          type: string
-        score:
-          type: integer
-        totalQuestions:
-          type: integer
-        percentage:
-          type: integer
         createdAt:
           type: string
-
-    ScoreInput:
-      type: object
-      required: [playerName, subjectId, score, totalQuestions]
-      properties:
-        playerName:
-          type: string
-          minLength: 1
-          maxLength: 30
-        subjectId:
-          type: integer
-        score:
-          type: integer
-        totalQuestions:
-          type: integer
-
-    Fact:
-      type: object
-      required: [id, subjectId, subjectName, text, emoji]
-      properties:
-        id:
-          type: integer
-        subjectId:
-          type: integer
-        subjectName:
-          type: string
-        text:
-          type: string
-        emoji:
-          type: string
-
-    Stats:
-      type: object
-      required: [totalQuizzesTaken, totalPlayersToday, averageScore, totalFacts]
-      properties:
-        totalQuizzesTaken:
-          type: integer
-        totalPlayersToday:
-          type: integer
-        averageScore:
-          type: integer
-        totalFacts:
-          type: integer

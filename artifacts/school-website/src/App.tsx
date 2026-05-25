@@ -4,15 +4,19 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import Subjects from "@/pages/subjects";
-import Quiz from "@/pages/quiz";
-import Leaderboard from "@/pages/leaderboard";
-import Facts from "@/pages/facts";
+import About from "@/pages/about";
+import Admissions from "@/pages/admissions";
+import SchoolLife from "@/pages/school-life";
+import News from "@/pages/news";
+import NewsDetail from "@/pages/news-detail";
+import Staff from "@/pages/staff";
+import Gallery from "@/pages/gallery";
+import Contact from "@/pages/contact";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60,
+      staleTime: 1000 * 60 * 2,
       retry: 1,
     },
   },
@@ -22,10 +26,16 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/subjects" component={Subjects} />
-      <Route path="/quiz" component={Quiz} />
-      <Route path="/leaderboard" component={Leaderboard} />
-      <Route path="/facts" component={Facts} />
+      <Route path="/about" component={About} />
+      <Route path="/admissions" component={Admissions} />
+      <Route path="/school-life" component={SchoolLife} />
+      <Route path="/news" component={News} />
+      <Route path="/news/:id">
+        {(params) => <NewsDetail id={Number(params.id)} />}
+      </Route>
+      <Route path="/staff" component={Staff} />
+      <Route path="/gallery" component={Gallery} />
+      <Route path="/contact" component={Contact} />
       <Route component={NotFound} />
     </Switch>
   );

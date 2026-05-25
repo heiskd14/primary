@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface GalleryItem {
+  id: number;
+  title: string;
+  imageUrl: string;
+  category: string;
+  createdAt: string;
 }
