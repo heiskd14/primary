@@ -7,7 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const CATEGORIES = ["All", "Achievement", "School Life", "Arts", "Sport", "Trips", "Curriculum", "Community"];
+const NAVY = "#1a237e";
+const RED = "#CC2200";
+
+const CATEGORIES = ["All", "Achievement", "School Life", "Arts", "Sport", "Events", "Curriculum", "Community"];
 
 export default function Gallery() {
   const [category, setCategory] = useState("All");
@@ -18,12 +21,11 @@ export default function Gallery() {
     <Layout>
       <PageHero
         title="Gallery"
-        subtitle="A glimpse into life at Greenfield Primary School"
+        subtitle="A glimpse into life at Triple Tee Montessori Academy"
         breadcrumb="Home / Gallery"
       />
 
       <section className="max-w-7xl mx-auto px-6 py-14">
-        {/* Filter */}
         <div className="flex flex-wrap gap-2 mb-8">
           {CATEGORIES.map(cat => (
             <button
@@ -32,9 +34,12 @@ export default function Gallery() {
               className={cn(
                 "px-4 py-2 rounded-full text-sm font-semibold border transition-colors",
                 category === cat
-                  ? "bg-[#1a3c6e] text-white border-[#1a3c6e]"
-                  : "bg-white text-gray-600 border-gray-300 hover:border-[#1a3c6e] hover:text-[#1a3c6e]"
+                  ? "text-white border-transparent"
+                  : "bg-white text-gray-600 border-gray-300"
               )}
+              style={category === cat ? { backgroundColor: NAVY, borderColor: NAVY } : undefined}
+              onMouseEnter={(e) => { if (category !== cat) { (e.currentTarget as HTMLElement).style.borderColor = NAVY; (e.currentTarget as HTMLElement).style.color = NAVY; } }}
+              onMouseLeave={(e) => { if (category !== cat) { (e.currentTarget as HTMLElement).style.borderColor = ""; (e.currentTarget as HTMLElement).style.color = ""; } }}
             >
               {cat}
             </button>
@@ -64,7 +69,7 @@ export default function Gallery() {
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end">
                       <div className="p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                        <span className="text-xs font-bold bg-yellow-400 text-[#1a3c6e] px-2 py-0.5 rounded-full">{item.category}</span>
+                        <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: RED }}>{item.category}</span>
                         <p className="text-white text-xs font-semibold mt-1 line-clamp-2">{item.title}</p>
                       </div>
                     </div>
@@ -75,7 +80,6 @@ export default function Gallery() {
         </div>
       </section>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {lightbox && (
           <motion.div

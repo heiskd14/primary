@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Georgia:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -71,35 +71,38 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
+  /* Triple Tee brand colours — navy & red from the logo */
   --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  --foreground: 234 67% 18%;
 
   --border: 214 32% 91%;
   --input: 214 32% 91%;
-  --ring: 221 83% 27%;
+  --ring: 234 67% 30%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 234 67% 18%;
   --card-border: 214 32% 91%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 234 67% 18%;
   --popover-border: 214 32% 91%;
 
-  --primary: 221 83% 27%;
+  /* Primary = deep navy #1a237e */
+  --primary: 234 67% 30%;
   --primary-foreground: 0 0% 100%;
-  --primary-border: hsl(221, 83%, 20%);
+  --primary-border: hsl(234, 67%, 22%);
 
-  --secondary: 43 96% 56%;
-  --secondary-foreground: 222 47% 11%;
-  --secondary-border: hsl(43, 96%, 45%);
+  /* Secondary = logo red #CC2200 */
+  --secondary: 10 100% 40%;
+  --secondary-foreground: 0 0% 100%;
+  --secondary-border: hsl(10, 100%, 32%);
 
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
   --muted-border: hsl(210, 40%, 88%);
 
   --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --accent-foreground: 234 67% 18%;
   --accent-border: hsl(210, 40%, 88%);
 
   --destructive: 0 84% 60%;
@@ -118,7 +121,7 @@
   --sidebar-accent: 240 5% 96%;
   --sidebar-accent-foreground: 240 6% 10%;
   --sidebar-accent-border: hsl(240, 5%, 88%);
-  --sidebar-ring: 217 91% 60%;
+  --sidebar-ring: 234 67% 30%;
 
   --radius: 0.5rem;
 

@@ -4,12 +4,16 @@ import { Layout } from "@/components/layout";
 import { PageHero } from "./about";
 import { CheckCircle, ChevronRight, Phone, Mail } from "lucide-react";
 
+const NAVY = "#1a237e";
+const RED = "#CC2200";
+
 const steps = [
-  { step: "1", title: "Check Eligibility", desc: "Our catchment area covers parts of Islington. Use our online postcode checker to see if your address is within our catchment." },
-  { step: "2", title: "Apply to Your Local Authority", desc: "Applications for Reception places are made through your local council (London Borough of Islington). Apply online at the council website by 15 January each year." },
-  { step: "3", title: "Visit the School", desc: "We hold open mornings throughout the autumn term. Book a tour to see our school in action and ask any questions you may have." },
-  { step: "4", title: "Receive Your Offer", desc: "Offers are sent by your local authority on National Offer Day (16 April). If you're offered a place, you'll need to accept it within the deadline." },
-  { step: "5", title: "Welcome to Greenfield!", desc: "Once you've accepted, we'll be in touch with transition information, uniform details, and an invitation to our welcome events for new families." },
+  { step: "1", title: "Visit the School", desc: "Come and see our school in person. We welcome prospective families to visit during school hours. Please call ahead to schedule your visit with our office." },
+  { step: "2", title: "Collect an Admission Form", desc: "Pick up an admission form from our school office. Forms are available at the beginning of each term. A small administrative fee applies." },
+  { step: "3", title: "Submit Completed Form", desc: "Return the completed form with the required documents: birth certificate, immunisation card, previous school report (if applicable), and passport photographs." },
+  { step: "4", title: "Entrance Assessment", desc: "Pupils seeking admission into Primary 1 and above will take a brief entrance assessment to help us understand their current learning level and ensure proper class placement." },
+  { step: "5", title: "Offer of Place", desc: "If a place is available and your child meets the entry requirements, we will issue an offer letter. You will then be given details of the acceptance fee and first-term school fees." },
+  { step: "6", title: "Welcome to Triple Tee!", desc: "Once fees are paid and all documents are submitted, your child is enrolled. Our team will guide you through the uniform, book list, and first-day arrangements." },
 ];
 
 export default function Admissions() {
@@ -17,34 +21,28 @@ export default function Admissions() {
     <Layout>
       <PageHero
         title="Admissions"
-        subtitle="How to apply for a place at Greenfield Primary School"
+        subtitle="How to enrol your child at Triple Tee Montessori Academy"
         breadcrumb="Home / Admissions"
       />
 
       <section className="max-w-7xl mx-auto px-6 py-14 grid lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2">
-          <h2 className="text-2xl font-bold text-[#1a3c6e] mb-3">Applying for a Reception Place</h2>
+          <h2 className="text-2xl font-bold mb-3" style={{ color: NAVY }}>Enrolling Your Child</h2>
           <p className="text-gray-600 leading-relaxed mb-8">
-            If your child is due to start primary school, we would love to welcome them to Greenfield Primary. Applications for Reception entry are managed by the London Borough of Islington and follow the national admissions timetable. Below is a step-by-step guide to the process.
+            We accept pupils from Creche (6 weeks) through to Junior Secondary School (JSS 3). Admissions are open at the start of each term, subject to availability of places. We encourage parents to apply early to secure a place for their child.
           </p>
 
           <div className="relative">
             <div className="absolute left-5 top-0 bottom-0 w-0.5 bg-blue-100" />
             <div className="space-y-8">
               {steps.map((s, i) => (
-                <motion.div
-                  key={s.step}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="relative flex gap-5 pl-2"
-                >
-                  <div className="flex-shrink-0 w-10 h-10 bg-[#1a3c6e] text-white rounded-full flex items-center justify-center font-extrabold text-lg relative z-10">
+                <motion.div key={s.step} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  className="relative flex gap-5 pl-2">
+                  <div className="flex-shrink-0 w-10 h-10 text-white rounded-full flex items-center justify-center font-extrabold text-lg relative z-10" style={{ backgroundColor: NAVY }}>
                     {s.step}
                   </div>
                   <div className="bg-white border border-gray-200 rounded-xl p-5 flex-1 shadow-sm">
-                    <h3 className="font-bold text-[#1a3c6e] mb-1">{s.title}</h3>
+                    <h3 className="font-bold mb-1" style={{ color: NAVY }}>{s.title}</h3>
                     <p className="text-gray-600 text-sm leading-relaxed">{s.desc}</p>
                   </div>
                 </motion.div>
@@ -55,42 +53,58 @@ export default function Admissions() {
 
         {/* Sidebar */}
         <div className="space-y-5">
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-r-xl p-5">
-            <h3 className="font-bold text-[#1a3c6e] mb-2">Key Dates 2026–27 Entry</h3>
+          <div className="rounded-r-xl p-5 border-l-4" style={{ backgroundColor: "#fff8e7", borderColor: "#C8A55F" }}>
+            <h3 className="font-bold mb-2" style={{ color: NAVY }}>Classes We Offer</h3>
             <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-start gap-2"><span className="font-semibold text-yellow-600 flex-shrink-0">Open Mornings:</span> Oct–Dec 2025</li>
-              <li className="flex items-start gap-2"><span className="font-semibold text-yellow-600 flex-shrink-0">Application Deadline:</span> 15 January 2026</li>
-              <li className="flex items-start gap-2"><span className="font-semibold text-yellow-600 flex-shrink-0">National Offer Day:</span> 16 April 2026</li>
-              <li className="flex items-start gap-2"><span className="font-semibold text-yellow-600 flex-shrink-0">Acceptance Deadline:</span> 30 April 2026</li>
+              {[
+                "Creche (6 weeks – 18 months)",
+                "Toddler (18 months – 2 years)",
+                "Nursery 1 & 2 (Ages 3 – 4)",
+                "Kindergarten (Age 5)",
+                "Primary 1 – 6 (Ages 6 – 11)",
+                "JSS 1 – 3 (Ages 12 – 14)",
+              ].map((c) => (
+                <li key={c} className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: RED }} />
+                  {c}
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-            <h3 className="font-bold text-[#1a3c6e] mb-3">Our Admissions Policy</h3>
-            <p className="text-sm text-gray-600 mb-3">Children with an Education, Health and Care Plan (EHCP) naming our school are admitted first. After this, places are offered according to our oversubscription criteria:</p>
-            <ol className="space-y-2 text-sm text-gray-600 list-decimal list-inside">
-              <li>Children in local authority care (Looked After Children)</li>
-              <li>Siblings of current pupils</li>
-              <li>Children of staff members</li>
-              <li>Children living closest to the school</li>
-            </ol>
+            <h3 className="font-bold mb-3" style={{ color: NAVY }}>Documents Required</h3>
+            <ul className="space-y-2 text-sm text-gray-700">
+              {[
+                "Completed admission form",
+                "Birth certificate (original & photocopy)",
+                "Immunisation card / health records",
+                "4 recent passport photographs",
+                "Previous school report cards (if any)",
+                "Parent/Guardian ID document",
+              ].map((d, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="font-bold flex-shrink-0 mt-0.5" style={{ color: RED }}>✓</span> {d}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="bg-[#1a3c6e] text-white rounded-xl p-5">
-            <h3 className="font-bold mb-3">In-Year Admissions</h3>
-            <p className="text-sm text-blue-100 mb-4">If you are moving to the area or need to change your child's school mid-year, please contact our school office directly.</p>
-            <a href="tel:01234567890" className="flex items-center gap-2 text-yellow-300 text-sm font-semibold hover:text-yellow-200 mb-2">
-              <Phone className="w-4 h-4" /> 01234 567 890
+          <div className="text-white rounded-xl p-5" style={{ backgroundColor: NAVY }}>
+            <h3 className="font-bold mb-3">Enquire About Admissions</h3>
+            <p className="text-sm text-blue-100 mb-4">Have questions? Contact our admissions team directly.</p>
+            <a href="tel:+2348012345678" className="flex items-center gap-2 text-sm font-semibold hover:text-white mb-2" style={{ color: "#fca5a5" }}>
+              <Phone className="w-4 h-4" /> +234 (0) 801 234 5678
             </a>
-            <a href="mailto:admissions@greenfieldprimary.sch.uk" className="flex items-center gap-2 text-yellow-300 text-sm font-semibold hover:text-yellow-200">
-              <Mail className="w-4 h-4" /> admissions@greenfieldprimary.sch.uk
+            <a href="mailto:admissions@tripletee.edu.ng" className="flex items-center gap-2 text-sm font-semibold hover:text-white" style={{ color: "#fca5a5" }}>
+              <Mail className="w-4 h-4" /> admissions@tripletee.edu.ng
             </a>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-            <h3 className="font-bold text-[#1a3c6e] mb-2">Book a School Tour</h3>
-            <p className="text-sm text-gray-600 mb-3">We hold open mornings throughout the autumn term. Come and see our school for yourself.</p>
-            <Link href="/contact" className="inline-flex items-center gap-1.5 bg-[#1a3c6e] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-800 transition-colors">
+          <div className="rounded-xl p-5" style={{ backgroundColor: "#f0f4ff", border: `1px solid ${NAVY}33` }}>
+            <h3 className="font-bold mb-2" style={{ color: NAVY }}>Book a School Visit</h3>
+            <p className="text-sm text-gray-600 mb-3">See our school in action before applying. We'd love to show you around.</p>
+            <Link href="/contact" className="inline-flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition-opacity" style={{ backgroundColor: RED }}>
               Book a Visit <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
@@ -99,16 +113,16 @@ export default function Admissions() {
 
       <section className="bg-gray-50 border-t border-gray-200 py-14">
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-2xl font-bold text-[#1a3c6e] mb-6">What to Expect at Greenfield</h2>
+          <h2 className="text-2xl font-bold mb-6" style={{ color: NAVY }}>What to Expect When You Join</h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
-              { title: "Settling In", desc: "We take great care with transition into school. New Reception pupils join gradually, with phased start arrangements to help every child settle confidently." },
-              { title: "Uniform", desc: "We have a smart, affordable uniform. Second-hand items are available through our PTA. Full details are provided upon acceptance of a place." },
-              { title: "Communication", desc: "We keep parents informed through our weekly newsletter, ParentMail, and the school website. You'll always know what's happening." },
+              { title: "Warm Welcome", desc: "Our staff will ensure your child settles in smoothly. New pupils are paired with a buddy from their class to help them feel at home from day one." },
+              { title: "School Uniform", desc: "We have a neat, affordable school uniform that instils pride and discipline. The full uniform list is provided upon acceptance of a place. Second-hand uniforms may be available." },
+              { title: "Ongoing Communication", desc: "We keep parents informed through our termly newsletter, notice board, and direct communication via SMS and WhatsApp. You will always know what is happening." },
             ].map((item, i) => (
               <div key={i} className="bg-white border border-gray-200 rounded-xl p-5">
-                <CheckCircle className="w-6 h-6 text-green-600 mb-3" />
-                <h3 className="font-bold text-[#1a3c6e] mb-2">{item.title}</h3>
+                <CheckCircle className="w-6 h-6 mb-3" style={{ color: RED }} />
+                <h3 className="font-bold mb-2" style={{ color: NAVY }}>{item.title}</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
               </div>
             ))}

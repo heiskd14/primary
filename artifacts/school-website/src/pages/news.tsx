@@ -21,7 +21,10 @@ function formatEventDate(dateStr: string) {
   };
 }
 
-const CATEGORIES = ["All", "Achievement", "School News", "Trips & Events", "Sport", "Arts & Culture"];
+const NAVY = "#1a237e";
+const RED = "#CC2200";
+
+const CATEGORIES = ["All", "Achievement", "School Life", "Events", "Curriculum", "Community"];
 
 export default function News() {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -34,16 +37,15 @@ export default function News() {
     <Layout>
       <PageHero
         title="News & Events"
-        subtitle="Stay up to date with everything happening at Greenfield Primary"
+        subtitle="Stay up to date with everything happening at Triple Tee Montessori Academy"
         breadcrumb="Home / News & Events"
       />
 
       <div className="max-w-7xl mx-auto px-6 py-14 grid lg:grid-cols-3 gap-10">
         {/* News */}
         <div className="lg:col-span-2">
-          <h2 className="text-2xl font-bold text-[#1a3c6e] mb-5">Latest News</h2>
+          <h2 className="text-2xl font-bold mb-5" style={{ color: NAVY }}>Latest News</h2>
 
-          {/* Category filter */}
           <div className="flex flex-wrap gap-2 mb-6">
             {CATEGORIES.map(cat => (
               <button
@@ -51,10 +53,11 @@ export default function News() {
                 onClick={() => setActiveCategory(cat)}
                 className={cn(
                   "px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors",
-                  activeCategory === cat
-                    ? "bg-[#1a3c6e] text-white border-[#1a3c6e]"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-[#1a3c6e] hover:text-[#1a3c6e]"
+                  activeCategory === cat ? "text-white border-transparent" : "bg-white text-gray-600 border-gray-300"
                 )}
+                style={activeCategory === cat ? { backgroundColor: NAVY, borderColor: NAVY } : undefined}
+                onMouseEnter={(e) => { if (activeCategory !== cat) { (e.currentTarget as HTMLElement).style.borderColor = NAVY; (e.currentTarget as HTMLElement).style.color = NAVY; } }}
+                onMouseLeave={(e) => { if (activeCategory !== cat) { (e.currentTarget as HTMLElement).style.borderColor = ""; (e.currentTarget as HTMLElement).style.color = ""; } }}
               >
                 {cat}
               </button>
@@ -67,29 +70,22 @@ export default function News() {
               : (
                 <AnimatePresence>
                   {filteredNews?.map((article, i) => (
-                    <motion.div
-                      key={article.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ delay: i * 0.06 }}
-                    >
+                    <motion.div key={article.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.06 }}>
                       <Link href={`/news/${article.id}`}>
-                        <div className="flex gap-5 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:border-[#1a3c6e] transition-all group cursor-pointer">
-                          <img
-                            src={article.imageUrl}
-                            alt={article.title}
-                            className="w-36 md:w-48 object-cover flex-shrink-0"
-                          />
+                        <div className="flex gap-5 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-all group cursor-pointer"
+                          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = NAVY; }}
+                          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = ""; }}
+                        >
+                          <img src={article.imageUrl} alt={article.title} className="w-36 md:w-48 object-cover flex-shrink-0" />
                           <div className="p-5 flex flex-col justify-between min-w-0">
                             <div>
-                              <span className="inline-block text-xs font-bold bg-blue-100 text-[#1a3c6e] px-2 py-0.5 rounded mb-2">{article.category}</span>
-                              <h3 className="font-bold text-gray-900 text-lg leading-snug group-hover:text-[#1a3c6e] transition-colors mb-2">{article.title}</h3>
+                              <span className="inline-block text-xs font-bold text-white px-2 py-0.5 rounded mb-2" style={{ backgroundColor: RED }}>{article.category}</span>
+                              <h3 className="font-bold text-gray-900 text-lg leading-snug transition-colors mb-2 group-hover:text-[#1a237e]">{article.title}</h3>
                               <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">{article.excerpt}</p>
                             </div>
                             <div className="flex items-center justify-between mt-3">
                               <div className="text-xs text-gray-500">{formatDate(article.publishedAt)} · {article.author}</div>
-                              <span className="text-xs font-semibold text-[#1a3c6e] flex items-center gap-1 group-hover:gap-2 transition-all">Read more <ArrowRight className="w-3 h-3" /></span>
+                              <span className="text-xs font-semibold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: NAVY }}>Read more <ArrowRight className="w-3 h-3" /></span>
                             </div>
                           </div>
                         </div>
@@ -103,39 +99,27 @@ export default function News() {
 
         {/* Events sidebar */}
         <div>
-          <h2 className="text-2xl font-bold text-[#1a3c6e] mb-5">School Events</h2>
+          <h2 className="text-2xl font-bold mb-5" style={{ color: NAVY }}>School Events</h2>
           <div className="space-y-3">
             {eventsLoading
               ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)
               : events?.map((event, i) => {
                 const d = formatEventDate(event.date);
-                const categoryColors: Record<string, string> = {
-                  "Term Dates": "bg-blue-100 text-blue-700",
-                  "Sport": "bg-green-100 text-green-700",
-                  "Arts": "bg-purple-100 text-purple-700",
-                  "Community": "bg-amber-100 text-amber-700",
-                  "Curriculum": "bg-red-100 text-red-700",
-                  "Parents": "bg-pink-100 text-pink-700",
-                  "Arts & Culture": "bg-purple-100 text-purple-700",
-                };
-                const colorClass = categoryColors[event.category] ?? "bg-gray-100 text-gray-600";
                 return (
-                  <motion.div
-                    key={event.id}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    className="bg-white border border-gray-200 rounded-xl p-4 hover:border-[#1a3c6e] hover:shadow-sm transition-all"
+                  <motion.div key={event.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
+                    className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all"
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = NAVY; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = ""; }}
                   >
                     <div className="flex gap-3">
-                      <div className="flex-shrink-0 w-12 bg-[#1a3c6e] rounded-lg text-center text-white py-2">
+                      <div className="flex-shrink-0 w-12 rounded-lg text-center text-white py-2" style={{ backgroundColor: NAVY }}>
                         <div className="text-lg font-extrabold leading-tight">{d.day}</div>
                         <div className="text-[10px] font-bold uppercase tracking-wider opacity-75">{d.month}</div>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-semibold text-sm text-gray-900 mb-1">{event.title}</div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", colorClass)}>{event.category}</span>
+                          <span className="text-xs font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: RED }}>{event.category}</span>
                           <span className="text-xs text-gray-500 flex items-center gap-1"><Calendar className="w-3 h-3" /> {event.time}</span>
                         </div>
                         <p className="text-xs text-gray-500 mt-1 line-clamp-1">{event.location}</p>
