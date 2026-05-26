@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, admissionsTable } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
 import { insertAdmissionSchema } from "@workspace/db";
-import { sendAdmissionNotification } from "../mailer";
+import { sendAdmissionNotification, sendStatusUpdateEmail } from "../mailer";
 
 const router = Router();
 
@@ -53,7 +53,21 @@ router.patch("/:id", async (req, res) => {
       .where(eq(admissionsTable.id, id))
       .returning();
     if (results.length === 0) return res.status(404).json({ error: "Not found" });
-    res.json({ ...results[0], submittedAt: results[0].submittedAt.toISOString() });
+    const updated = { ...results[0], submittedAt: results[0].submittedAt.toISOString() };
+    res.json(updated);
+
+    if (updated.parentEmail && ["reviewed", "accepted", "rejected"].includes(status)) {
+      sendStatusUpdateEmail({
+        childFirstName: updated.childFirstName,
+        childLastName: updated.childLastName,
+        classApplyingFor: updated.classApplyingFor,
+        parentName: updated.parentName,
+        parentEmail: updated.parentEmail,
+        status: updated.status,
+      }).catch((err) => {
+        req.log.error({ err }, "Failed to send status update email");
+      });
+    }
   } catch (err) {
     req.log.error({ err }, "Failed to update admission status");
     res.status(500).json({ error: "Failed to update admission status" });

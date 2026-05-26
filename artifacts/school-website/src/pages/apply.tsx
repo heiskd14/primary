@@ -111,6 +111,8 @@ export default function Apply() {
       if (!form.parentName.trim()) e.parentName = "Required";
       if (!form.parentRelationship) e.parentRelationship = "Required";
       if (!form.parentPhone.trim()) e.parentPhone = "Required";
+      if (!form.parentEmail.trim()) e.parentEmail = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.parentEmail)) e.parentEmail = "Enter a valid email address";
       if (!form.parentAddress.trim()) e.parentAddress = "Required";
     }
     setErrors(e);
@@ -284,8 +286,10 @@ export default function Apply() {
                   <Field label="Second Phone Number (optional)">
                     <Input value={form.parentPhone2} onChange={set("parentPhone2")} placeholder="08XXXXXXXXX" />
                   </Field>
-                  <Field label="Email Address (optional)">
-                    <Input type="email" value={form.parentEmail} onChange={set("parentEmail")} placeholder="your.email@example.com" />
+                  <Field label="Email Address (Gmail)" required>
+                    <Input type="email" value={form.parentEmail} onChange={set("parentEmail")} placeholder="your.email@gmail.com" />
+                    {errors.parentEmail && <p className="text-red-500 text-xs mt-1">{errors.parentEmail}</p>}
+                    <p className="text-xs text-gray-500 mt-1">You will receive application updates (reviewed, accepted, rejected) to this email.</p>
                   </Field>
                   <div className="md:col-span-2">
                     <Field label="Home Address" required>
