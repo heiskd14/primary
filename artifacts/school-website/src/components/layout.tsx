@@ -19,6 +19,7 @@ const navItems = [
   { href: "/school-life", label: "School Life" },
   { href: "/news", label: "News & Events" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/portals", label: "Portals" },
   { href: "/contact", label: "Contact" },
 ];
 
