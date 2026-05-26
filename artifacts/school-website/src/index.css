@@ -155,3 +155,11 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+[data-replit-badge],
+#replit-badge,
+.replit-badge,
+[class*="replit-badge"],
+[id*="replit-badge"] {
+  display: none !important;
+}
