@@ -33,15 +33,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div style={{ backgroundColor: NAVY }} className="text-white text-sm hidden md:block">
         <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <a href="tel:+2348012345678" className="flex items-center gap-1.5 hover:text-red-300 transition-colors">
-              <Phone className="w-3.5 h-3.5" /> +234 (0) 801 234 5678
+            <a href="tel:07036500419" className="flex items-center gap-1.5 hover:text-red-300 transition-colors">
+              <Phone className="w-3.5 h-3.5" /> 07036500419
             </a>
-            <a href="mailto:info@tripletee.edu.ng" className="flex items-center gap-1.5 hover:text-red-300 transition-colors">
-              <Mail className="w-3.5 h-3.5" /> info@tripletee.edu.ng
+            <a href="tel:08032348460" className="flex items-center gap-1.5 hover:text-red-300 transition-colors">
+              <Phone className="w-3.5 h-3.5" /> 08032348460
+            </a>
+            <a href="mailto:tripleteeschools@gmail.com" className="flex items-center gap-1.5 hover:text-red-300 transition-colors">
+              <Mail className="w-3.5 h-3.5" /> tripleteeschools@gmail.com
             </a>
           </div>
           <span className="flex items-center gap-1.5 text-blue-200">
-            <MapPin className="w-3.5 h-3.5" /> Oke-Ola, Oro, Irepodun LGA, Kwara State, Nigeria
+            <MapPin className="w-3.5 h-3.5" /> Opp. Winners Chapel, Oke-Ola, Oro, Kwara State
           </span>
         </div>
       </div>
@@ -59,8 +62,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <div className="text-base md:text-lg font-bold leading-tight" style={{ color: NAVY }}>
                 Triple Tee Montessori Academy
               </div>
-              <div className="text-xs font-medium" style={{ color: RED }}>
-                Building God Centered Future
+              <div className="text-xs font-medium italic" style={{ color: RED }}>
+                Inspiring Excellence, Building Character, Nurturing Futures
               </div>
             </div>
           </Link>
@@ -89,17 +92,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                           href={child.href}
                           className={cn(
                             "block px-4 py-3 text-sm font-medium transition-colors",
-                            location === child.href
-                              ? "text-white"
-                              : "text-gray-700 hover:text-white"
+                            location === child.href ? "text-white" : "text-gray-700"
                           )}
-                          style={
-                            location === child.href
-                              ? { backgroundColor: NAVY }
-                              : undefined
-                          }
-                          onMouseEnter={(e) => { if (location !== child.href) (e.currentTarget as HTMLElement).style.backgroundColor = NAVY; }}
-                          onMouseLeave={(e) => { if (location !== child.href) (e.currentTarget as HTMLElement).style.backgroundColor = ""; }}
+                          style={location === child.href ? { backgroundColor: NAVY } : undefined}
+                          onMouseEnter={(e) => { if (location !== child.href) (e.currentTarget as HTMLElement).style.backgroundColor = NAVY; (e.currentTarget as HTMLElement).style.color = "white"; }}
+                          onMouseLeave={(e) => { if (location !== child.href) { (e.currentTarget as HTMLElement).style.backgroundColor = ""; (e.currentTarget as HTMLElement).style.color = ""; } }}
                         >
                           {child.label}
                         </Link>
@@ -111,7 +108,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href!}
-                  className="px-4 py-6 text-sm font-semibold transition-colors"
+                  className="px-4 py-6 text-sm font-semibold transition-colors text-gray-700"
                   style={{
                     color: location === item.href ? NAVY : undefined,
                     borderBottom: location === item.href ? `3px solid ${NAVY}` : "3px solid transparent",
@@ -174,8 +171,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <img src="/logo.jpeg" alt="Logo" className="w-12 h-12 object-contain rounded-full bg-white p-0.5" />
               <span className="font-bold text-base leading-tight">Triple Tee<br />Montessori Academy</span>
             </div>
+            <p className="text-blue-200 text-sm leading-relaxed mb-1 italic">
+              "Building God Centered Future"
+            </p>
             <p className="text-blue-200 text-sm leading-relaxed mb-4">
-              Building God Centered Future — a caring, faith-based school nurturing young minds in Oke-Ola, Oro, Kwara State.
+              Quality, affordable, faith-based education for children in Oke-Ola, Oro, Kwara State.
             </p>
             <div className="flex gap-3">
               <a href="#" className="w-8 h-8 rounded flex items-center justify-center hover:opacity-80 transition-opacity" style={{ backgroundColor: RED }}>
@@ -194,7 +194,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 { href: "/about", label: "About Us" },
                 { href: "/admissions", label: "Admissions" },
                 { href: "/school-life", label: "School Life" },
-                { href: "/staff", label: "Our Staff" },
+                { href: "/staff", label: "Our Teachers" },
+                { href: "/gallery", label: "Gallery" },
+                { href: "/news", label: "News & Events" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
@@ -204,13 +206,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-red-300">Useful Info</h4>
+            <h4 className="font-bold text-sm uppercase tracking-wider mb-4 text-red-300">School Info</h4>
             <ul className="space-y-2 text-blue-200 text-sm">
-              <li><a href="#" className="hover:text-white transition-colors">School Policies</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Term Dates</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">School Uniform</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">WAEC / NECO Prep</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">PTA Information</a></li>
+              <li>School Hours: 7:00am – 6:00pm</li>
+              <li>Monday – Friday</li>
+              <li className="pt-1">Online Admission Available</li>
+              <li><a href="/admissions" className="hover:text-white transition-colors">Apply Now →</a></li>
             </ul>
           </div>
 
@@ -219,26 +220,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <ul className="space-y-3 text-blue-200 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Oke-Ola, Oro, Irepodun LGA, Kwara State, Nigeria</span>
+                <span>Opposite Winners Chapel, Oke-Ola, Oro, Along Ijomu-Oro Road, Oro, Kwara State</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <a href="tel:+2348012345678" className="hover:text-white transition-colors">+234 (0) 801 234 5678</a>
+                <div>
+                  <a href="tel:07036500419" className="hover:text-white transition-colors block">07036500419</a>
+                  <a href="tel:08032348460" className="hover:text-white transition-colors block">08032348460</a>
+                </div>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <a href="mailto:info@tripletee.edu.ng" className="hover:text-white transition-colors">info@tripletee.edu.ng</a>
+                <a href="mailto:tripleteeschools@gmail.com" className="hover:text-white transition-colors break-all">tripleteeschools@gmail.com</a>
               </li>
             </ul>
           </div>
         </div>
-        <div className="border-t border-blue-900 py-4">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-2 text-blue-300 text-xs">
-            <p>&copy; 2026 Triple Tee Montessori Academy. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Cookie Policy</a>
-            </div>
+        <div className="border-t border-blue-900 py-4" style={{ backgroundColor: RED }}>
+          <div className="max-w-7xl mx-auto px-6 text-center text-white text-sm font-semibold">
+            &copy; 2026 Triple Tee Montessori Academy. All rights reserved.
           </div>
         </div>
       </footer>
