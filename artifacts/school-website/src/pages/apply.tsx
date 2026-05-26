@@ -10,20 +10,16 @@ const NAVY = "#1a237e";
 const RED = "#CC2200";
 
 const CLASSES = [
-  "Creche (6 weeks – 18 months)",
-  "Toddler (18 months – 2 years)",
-  "Nursery 1 (Age 3)",
-  "Nursery 2 (Age 4)",
-  "Kindergarten (Age 5)",
-  "Primary 1 (Age 6)",
-  "Primary 2 (Age 7)",
-  "Primary 3 (Age 8)",
-  "Primary 4 (Age 9)",
-  "Primary 5 (Age 10)",
-  "Primary 6 (Age 11)",
-  "JSS 1",
-  "JSS 2",
-  "JSS 3",
+  "Creche",
+  "Toddler",
+  "Nursery 1",
+  "Nursery 2",
+  "Kindergarten",
+  "Primary 1",
+  "Primary 2",
+  "Primary 3",
+  "Primary 4",
+  "Primary 5",
 ];
 
 type FormData = {

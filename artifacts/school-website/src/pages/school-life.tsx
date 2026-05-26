@@ -1,35 +1,57 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/layout";
 import { PageHero } from "./about";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const NAVY = "#1a237e";
 const RED = "#CC2200";
 
-const subjects = [
-  { name: "English Language", emoji: "📖", desc: "Building confident readers, writers, and speakers through phonics, comprehension, grammar, and creative expression." },
-  { name: "Mathematics", emoji: "🔢", desc: "From counting and number sense to algebra and geometry — we make maths practical, visual, and enjoyable." },
-  { name: "Basic Science & Technology", emoji: "🔬", desc: "Hands-on experiments, environmental science, and introductory technology skills for a modern Nigeria." },
-  { name: "Social Studies", emoji: "🌍", desc: "Understanding Nigerian history, civic values, geography, and our responsibilities as citizens." },
-  { name: "Christian Religious Studies", emoji: "✝️", desc: "Scripture, prayer, and Christian values form a central part of our school's identity and daily life." },
-  { name: "Yoruba Language", emoji: "🗣️", desc: "We celebrate our cultural heritage through the study of Yoruba language, literature, and oral tradition." },
-  { name: "Cultural & Creative Arts", emoji: "🎨", desc: "Drawing, painting, crafts, drama, and music — nurturing creativity and self-expression in every child." },
-  { name: "Physical & Health Education", emoji: "⚽", desc: "Sports, games, and health education keeping our pupils fit, active, and aware of healthy living." },
-  { name: "Computer Studies", emoji: "💻", desc: "Introducing pupils to digital literacy, keyboarding, internet safety, and basic computing from an early age." },
-  { name: "Vocational Aptitude", emoji: "🛠️", desc: "Practical skills and entrepreneurship education preparing pupils for real-world challenges and opportunities." },
+const DEFAULT_SUBJECTS = [
+  { id: 0, name: "English Language", emoji: "📖", description: "Building confident readers, writers, and speakers through phonics, comprehension, grammar, and creative expression.", displayOrder: 0 },
+  { id: 1, name: "Mathematics", emoji: "🔢", description: "From counting and number sense to algebra and geometry — we make maths practical, visual, and enjoyable.", displayOrder: 1 },
+  { id: 2, name: "Basic Science & Technology", emoji: "🔬", description: "Hands-on experiments, environmental science, and introductory technology skills for a modern Nigeria.", displayOrder: 2 },
+  { id: 3, name: "Social Studies", emoji: "🌍", description: "Understanding Nigerian history, civic values, geography, and our responsibilities as citizens.", displayOrder: 3 },
+  { id: 4, name: "Christian Religious Studies", emoji: "✝️", description: "Scripture, prayer, and Christian values form a central part of our school's identity and daily life.", displayOrder: 4 },
+  { id: 5, name: "Yoruba Language", emoji: "🗣️", description: "We celebrate our cultural heritage through the study of Yoruba language, literature, and oral tradition.", displayOrder: 5 },
+  { id: 6, name: "Cultural & Creative Arts", emoji: "🎨", description: "Drawing, painting, crafts, drama, and music — nurturing creativity and self-expression in every child.", displayOrder: 6 },
+  { id: 7, name: "Physical & Health Education", emoji: "⚽", description: "Sports, games, and health education keeping our pupils fit, active, and aware of healthy living.", displayOrder: 7 },
+  { id: 8, name: "Computer Studies", emoji: "💻", description: "Introducing pupils to digital literacy, keyboarding, internet safety, and basic computing from an early age.", displayOrder: 8 },
+  { id: 9, name: "Vocational Aptitude", emoji: "🛠️", description: "Practical skills and entrepreneurship education preparing pupils for real-world challenges and opportunities.", displayOrder: 9 },
 ];
 
-const clubs = [
-  { name: "Football Club", time: "Tuesdays & Thursdays", year: "Primary – JSS", icon: "⚽" },
-  { name: "Debate & Public Speaking", time: "Wednesdays", year: "Primary 4 – JSS", icon: "🎤" },
-  { name: "Cultural Dance Club", time: "Fridays", year: "All Classes", icon: "💃" },
-  { name: "Art & Craft Club", time: "Wednesdays", year: "Nursery – Primary", icon: "🎨" },
-  { name: "Scripture Union (SU)", time: "Every Morning", year: "Primary 1 – JSS", icon: "✝️" },
-  { name: "Science Club", time: "Thursdays", year: "Primary 3 – JSS", icon: "🔬" },
-  { name: "Music & Choir", time: "Fridays", year: "All Classes", icon: "🎵" },
-  { name: "Junior Entrepreneurs Club", time: "Saturdays (select)", year: "Primary 4 – JSS", icon: "💼" },
+const DEFAULT_CLUBS = [
+  { id: 0, name: "Football Club", timeSlot: "Tuesdays & Thursdays", yearGroup: "Primary 1 – Primary 5", icon: "⚽", displayOrder: 0 },
+  { id: 1, name: "Debate & Public Speaking", timeSlot: "Wednesdays", yearGroup: "Primary 3 – Primary 5", icon: "🎤", displayOrder: 1 },
+  { id: 2, name: "Cultural Dance Club", timeSlot: "Fridays", yearGroup: "All Classes", icon: "💃", displayOrder: 2 },
+  { id: 3, name: "Art & Craft Club", timeSlot: "Wednesdays", yearGroup: "Nursery – Primary", icon: "🎨", displayOrder: 3 },
+  { id: 4, name: "Scripture Union (SU)", timeSlot: "Every Morning", yearGroup: "Primary 1 – Primary 5", icon: "✝️", displayOrder: 4 },
+  { id: 5, name: "Science Club", timeSlot: "Thursdays", yearGroup: "Primary 3 – Primary 5", icon: "🔬", displayOrder: 5 },
+  { id: 6, name: "Music & Choir", timeSlot: "Fridays", yearGroup: "All Classes", icon: "🎵", displayOrder: 6 },
+  { id: 7, name: "Junior Entrepreneurs Club", timeSlot: "Saturdays (select)", yearGroup: "Primary 3 – Primary 5", icon: "💼", displayOrder: 7 },
 ];
+
+type Subject = typeof DEFAULT_SUBJECTS[0];
+type Club = typeof DEFAULT_CLUBS[0];
 
 export default function SchoolLife() {
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/school-life/subjects").then(r => r.ok ? r.json() : []),
+      fetch("/api/school-life/clubs").then(r => r.ok ? r.json() : []),
+    ]).then(([s, c]) => {
+      setSubjects(s.length > 0 ? s : DEFAULT_SUBJECTS);
+      setClubs(c.length > 0 ? c : DEFAULT_CLUBS);
+    }).catch(() => {
+      setSubjects(DEFAULT_SUBJECTS);
+      setClubs(DEFAULT_CLUBS);
+    }).finally(() => setLoading(false));
+  }, []);
+
   return (
     <Layout>
       <PageHero
@@ -45,14 +67,16 @@ export default function SchoolLife() {
           We follow the Nigerian Educational Research and Development Council (NERDC) / Universal Basic Education (UBE) curriculum, enriched with the Montessori philosophy. Our curriculum is designed to develop critical thinking, creativity, and godly character alongside strong academic foundations.
         </p>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          {subjects.map((s, i) => (
-            <motion.div key={s.name} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-              className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all">
-              <div className="text-3xl mb-2">{s.emoji}</div>
-              <h3 className="font-bold text-sm mb-1" style={{ color: NAVY }}>{s.name}</h3>
-              <p className="text-xs text-gray-600 leading-relaxed">{s.desc}</p>
-            </motion.div>
-          ))}
+          {loading
+            ? Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)
+            : subjects.map((s, i) => (
+              <motion.div key={s.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all">
+                <div className="text-3xl mb-2">{s.emoji}</div>
+                <h3 className="font-bold text-sm mb-1" style={{ color: NAVY }}>{s.name}</h3>
+                <p className="text-xs text-gray-600 leading-relaxed">{s.description}</p>
+              </motion.div>
+            ))}
         </div>
       </section>
 
@@ -91,15 +115,17 @@ export default function SchoolLife() {
         <h2 className="text-2xl font-bold mb-2" style={{ color: NAVY }}>Clubs & Activities</h2>
         <p className="text-gray-600 mb-8">We offer a range of extracurricular activities that develop talent, build character, and strengthen community.</p>
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {clubs.map((c, i) => (
-            <motion.div key={c.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-              className="bg-white border border-gray-200 rounded-xl p-4">
-              <div className="text-2xl mb-2">{c.icon}</div>
-              <div className="font-bold text-sm" style={{ color: NAVY }}>{c.name}</div>
-              <div className="text-xs text-gray-500 mt-1">{c.time}</div>
-              <div className="text-xs font-medium mt-0.5" style={{ color: RED }}>{c.year}</div>
-            </motion.div>
-          ))}
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)
+            : clubs.map((c, i) => (
+              <motion.div key={c.id} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
+                className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-2xl mb-2">{c.icon}</div>
+                <div className="font-bold text-sm" style={{ color: NAVY }}>{c.name}</div>
+                <div className="text-xs text-gray-500 mt-1">{c.timeSlot}</div>
+                <div className="text-xs font-medium mt-0.5" style={{ color: RED }}>{c.yearGroup}</div>
+              </motion.div>
+            ))}
         </div>
       </section>
 

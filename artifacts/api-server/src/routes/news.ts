@@ -30,7 +30,7 @@ router.get("/:id", async (req, res) => {
     const r = results[0];
     res.json({ ...r, imageUrl: r.imageUrl, publishedAt: r.publishedAt.toISOString() });
   } catch (err) {
-    req.log.error({ err }, "Failed to get news");
+    req.log.error({ err }, "Failed to get news" );
     res.status(500).json({ error: "Failed to get news" });
   }
 });
@@ -44,6 +44,33 @@ router.post("/", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Failed to create news");
     res.status(500).json({ error: "Failed to create news" });
+  }
+});
+
+router.patch("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const parsed = insertNewsSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: "Invalid data" });
+    const results = await db.update(newsTable).set(parsed.data).where(eq(newsTable.id, id)).returning();
+    if (results.length === 0) return res.status(404).json({ error: "Not found" });
+    const r = results[0];
+    res.json({ ...r, publishedAt: r.publishedAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update news");
+    res.status(500).json({ error: "Failed to update news" });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const results = await db.delete(newsTable).where(eq(newsTable.id, id)).returning();
+    if (results.length === 0) return res.status(404).json({ error: "Not found" });
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete news");
+    res.status(500).json({ error: "Failed to delete news" });
   }
 });
 
