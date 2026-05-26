@@ -8,6 +8,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const SCHOOL_URL = process.env.SCHOOL_URL ?? "https://triple-tee-montessori-academy.replit.app";
+
 const FOOTER = `
   <div style="background-color: #CC2200; padding: 14px; text-align: center;">
     <p style="color: white; margin: 0; font-size: 13px;">Triple Tee Montessori Academy · Opp. Winners Chapel, Oke-Ola, Oro, Kwara State</p>
@@ -143,6 +145,128 @@ export async function sendStatusUpdateEmail(admission: {
   await transporter.sendMail({
     from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
     to: admission.parentEmail,
+    subject,
+    html,
+  });
+}
+
+export async function sendStudentCredentialsEmail(opts: {
+  parentName: string;
+  parentEmail: string;
+  childFirstName: string;
+  childLastName: string;
+  classLevel: string;
+  studentEmail: string;
+  plainPassword: string;
+}) {
+  const subject = `🎓 Student Portal Login Details — ${opts.childFirstName} ${opts.childLastName}`;
+  const portalUrl = `${SCHOOL_URL}/student-portal`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #1a237e; padding: 28px; text-align: center;">
+        <div style="font-size: 42px; margin-bottom: 10px;">🎓</div>
+        <h1 style="color: white; margin: 0; font-size: 22px;">Student Portal Access</h1>
+        <p style="color: #bfcfff; margin: 8px 0 0; font-size: 14px;">Triple Tee Montessori Academy</p>
+      </div>
+      <div style="padding: 28px;">
+        <p style="font-size: 15px; color: #374151; margin: 0 0 16px;">Dear <strong>${opts.parentName}</strong>,</p>
+        <p style="font-size: 15px; color: #374151; margin: 0 0 20px; line-height: 1.6;">
+          Your child <strong>${opts.childFirstName} ${opts.childLastName}</strong> (${opts.classLevel}) now has access to the Triple Tee Montessori Academy Student Portal.
+          Use the credentials below to sign in and access academic records, timetables, and school notices.
+        </p>
+
+        <div style="background: #f0f4ff; border: 2px solid #1a237e; border-radius: 12px; padding: 20px; margin: 24px 0;">
+          <h2 style="color: #1a237e; font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.05em;">Login Credentials</h2>
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+            <tr>
+              <td style="color: #6b7280; padding: 6px 0; width: 35%;">Portal URL</td>
+              <td style="color: #1a237e; font-weight: bold;">
+                <a href="${portalUrl}" style="color: #1a237e;">${portalUrl}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="color: #6b7280; padding: 6px 0;">Email Address</td>
+              <td style="color: #111827; font-weight: bold; font-size: 15px;">${opts.studentEmail}</td>
+            </tr>
+            <tr>
+              <td style="color: #6b7280; padding: 6px 0;">Password</td>
+              <td style="color: #111827; font-weight: bold; font-size: 15px; font-family: monospace; background: #fff; padding: 4px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">${opts.plainPassword}</td>
+            </tr>
+          </table>
+        </div>
+
+        <div style="background: #fef3c7; border-left: 4px solid #d97706; border-radius: 6px; padding: 14px; margin: 20px 0; font-size: 13px; color: #374151;">
+          <strong>⚠️ Security Reminder:</strong> Please change the password after your first login. Do not share these credentials with anyone.
+        </div>
+
+        <a href="${portalUrl}" style="display: inline-block; background-color: #16a34a; color: white; font-weight: bold; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none; margin-top: 8px;">
+          Go to Student Portal →
+        </a>
+
+        <p style="font-size: 13px; color: #6b7280; margin-top: 28px; line-height: 1.6;">
+          If you have any issues logging in, please contact us:<br/>
+          📞 07036500419 &nbsp;|&nbsp; 08032348460<br/>
+          ✉️ tripleteeschools@gmail.com
+        </p>
+      </div>
+      ${FOOTER}
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
+    to: opts.parentEmail,
+    subject,
+    html,
+  });
+}
+
+export async function sendPasswordResetEmail(opts: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  token: string;
+}) {
+  const resetUrl = `${SCHOOL_URL}/reset-password?token=${opts.token}`;
+  const subject = "🔑 Student Portal — Password Reset Request";
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #1a237e; padding: 28px; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 8px;">🔑</div>
+        <h1 style="color: white; margin: 0; font-size: 20px;">Password Reset Request</h1>
+        <p style="color: #bfcfff; margin: 8px 0 0; font-size: 14px;">Triple Tee Montessori Academy Student Portal</p>
+      </div>
+      <div style="padding: 28px;">
+        <p style="font-size: 15px; color: #374151; margin: 0 0 16px;">Hello <strong>${opts.firstName} ${opts.lastName}</strong>,</p>
+        <p style="font-size: 15px; color: #374151; margin: 0 0 20px; line-height: 1.6;">
+          We received a request to reset the password for the student portal account associated with <strong>${opts.email}</strong>.
+          Click the button below to set a new password. This link is valid for <strong>1 hour</strong>.
+        </p>
+
+        <div style="text-align: center; margin: 28px 0;">
+          <a href="${resetUrl}" style="display: inline-block; background-color: #1a237e; color: white; font-weight: bold; font-size: 15px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
+            Reset My Password
+          </a>
+        </div>
+
+        <p style="font-size: 13px; color: #6b7280; margin-top: 20px; line-height: 1.6;">
+          If the button doesn't work, copy and paste this link into your browser:<br/>
+          <a href="${resetUrl}" style="color: #1a237e; word-break: break-all;">${resetUrl}</a>
+        </p>
+
+        <div style="background: #fee2e2; border-left: 4px solid #CC2200; border-radius: 6px; padding: 14px; margin-top: 20px; font-size: 13px; color: #374151;">
+          If you did not request a password reset, please ignore this email. Your password will not change.
+        </div>
+      </div>
+      ${FOOTER}
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
+    to: opts.email,
     subject,
     html,
   });

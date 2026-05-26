@@ -5,3 +5,4 @@ export * from "./gallery";
 export * from "./admissions";
 export * from "./school_life";
 export * from "./site_content";
+export * from "./student_accounts";
