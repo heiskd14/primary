@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db, admissionsTable } from "@workspace/db";
 import { desc, eq } from "drizzle-orm";
 import { insertAdmissionSchema } from "@workspace/db";
+import { sendAdmissionNotification } from "../mailer";
+
 const router = Router();
 
 router.post("/", async (req, res) => {
@@ -14,9 +16,12 @@ router.post("/", async (req, res) => {
       .insert(admissionsTable)
       .values(parsed.data)
       .returning();
-    res.status(201).json({
-      ...admission,
-      submittedAt: admission.submittedAt.toISOString(),
+
+    const result = { ...admission, submittedAt: admission.submittedAt.toISOString() };
+    res.status(201).json(result);
+
+    sendAdmissionNotification(result).catch((err) => {
+      req.log.error({ err }, "Failed to send admission email notification");
     });
   } catch (err) {
     req.log.error({ err }, "Failed to submit admission");
