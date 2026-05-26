@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout";
 import { PageHero } from "./about";
-import { CheckCircle, ChevronRight, Phone, Mail } from "lucide-react";
+import { CheckCircle, ChevronRight, Phone, Mail, FileText } from "lucide-react";
 
 const NAVY = "#1a237e";
 const RED = "#CC2200";
@@ -53,6 +53,21 @@ export default function Admissions() {
 
         {/* Sidebar */}
         <div className="space-y-5">
+          {/* Apply Online CTA */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="rounded-xl p-6 text-white text-center" style={{ backgroundColor: RED }}>
+            <FileText className="w-10 h-10 mx-auto mb-3 opacity-90" />
+            <h3 className="font-extrabold text-lg mb-2">Apply Online Now</h3>
+            <p className="text-sm text-red-100 mb-4 leading-relaxed">
+              Skip the queue — fill in our secure online admission form in minutes.
+            </p>
+            <Link href="/apply"
+              className="inline-flex items-center gap-2 bg-white font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-red-50 transition-colors"
+              style={{ color: RED }}>
+              Start Application <ChevronRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+
           <div className="rounded-r-xl p-5 border-l-4" style={{ backgroundColor: "#fff8e7", borderColor: "#C8A55F" }}>
             <h3 className="font-bold mb-2" style={{ color: NAVY }}>Classes We Offer</h3>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -93,11 +108,14 @@ export default function Admissions() {
           <div className="text-white rounded-xl p-5" style={{ backgroundColor: NAVY }}>
             <h3 className="font-bold mb-3">Enquire About Admissions</h3>
             <p className="text-sm text-blue-100 mb-4">Have questions? Contact our admissions team directly.</p>
-            <a href="tel:+2348012345678" className="flex items-center gap-2 text-sm font-semibold hover:text-white mb-2" style={{ color: "#fca5a5" }}>
-              <Phone className="w-4 h-4" /> +234 (0) 801 234 5678
+            <a href="tel:07036500419" className="flex items-center gap-2 text-sm font-semibold hover:text-white mb-2" style={{ color: "#fca5a5" }}>
+              <Phone className="w-4 h-4" /> 07036500419
             </a>
-            <a href="mailto:admissions@tripletee.edu.ng" className="flex items-center gap-2 text-sm font-semibold hover:text-white" style={{ color: "#fca5a5" }}>
-              <Mail className="w-4 h-4" /> admissions@tripletee.edu.ng
+            <a href="tel:08032348460" className="flex items-center gap-2 text-sm font-semibold hover:text-white mb-2" style={{ color: "#fca5a5" }}>
+              <Phone className="w-4 h-4" /> 08032348460
+            </a>
+            <a href="mailto:tripleteeschools@gmail.com" className="flex items-center gap-2 text-sm font-semibold hover:text-white" style={{ color: "#fca5a5" }}>
+              <Mail className="w-4 h-4" /> tripleteeschools@gmail.com
             </a>
           </div>
 

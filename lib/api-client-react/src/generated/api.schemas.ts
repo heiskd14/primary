@@ -57,6 +57,43 @@ export interface GalleryItem {
   createdAt: string;
 }
 
+export interface AdmissionInput {
+  childFirstName: string;
+  childLastName: string;
+  childDob: string;
+  childGender: string;
+  classApplyingFor: string;
+  previousSchool?: string;
+  parentName: string;
+  parentRelationship: string;
+  parentPhone: string;
+  parentPhone2?: string;
+  parentEmail?: string;
+  parentAddress: string;
+  howDidYouHear?: string;
+  additionalInfo?: string;
+}
+
+export interface Admission {
+  id: number;
+  childFirstName: string;
+  childLastName: string;
+  childDob: string;
+  childGender: string;
+  classApplyingFor: string;
+  previousSchool?: string;
+  parentName: string;
+  parentRelationship: string;
+  parentPhone: string;
+  parentPhone2?: string;
+  parentEmail?: string;
+  parentAddress: string;
+  howDidYouHear?: string;
+  additionalInfo?: string;
+  status: string;
+  submittedAt: string;
+}
+
 export type ListNewsParams = {
 limit?: number;
 category?: string;

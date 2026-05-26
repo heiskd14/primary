@@ -20,6 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Admission,
+  AdmissionInput,
   GalleryItem,
   HealthStatus,
   ListEventsParams,
@@ -604,4 +606,75 @@ export function useListGallery<TData = Awaited<ReturnType<typeof listGallery>>, 
 
 
 
+
+export const getSubmitAdmissionUrl = () => {
+
+
+
+
+  return `/api/admissions`
+}
+
+/**
+ * @summary Submit an online admission application
+ */
+export const submitAdmission = async (admissionInput: AdmissionInput, options?: RequestInit): Promise<Admission> => {
+
+  return customFetch<Admission>(getSubmitAdmissionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      admissionInput,)
+  }
+);}
+
+
+
+
+export const getSubmitAdmissionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitAdmission>>, TError,{data: BodyType<AdmissionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitAdmission>>, TError,{data: BodyType<AdmissionInput>}, TContext> => {
+
+const mutationKey = ['submitAdmission'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitAdmission>>, {data: BodyType<AdmissionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitAdmission(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitAdmissionMutationResult = NonNullable<Awaited<ReturnType<typeof submitAdmission>>>
+    export type SubmitAdmissionMutationBody = BodyType<AdmissionInput>
+    export type SubmitAdmissionMutationError = ErrorType<void>
+
+    /**
+ * @summary Submit an online admission application
+ */
+export const useSubmitAdmission = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitAdmission>>, TError,{data: BodyType<AdmissionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitAdmission>>,
+        TError,
+        {data: BodyType<AdmissionInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitAdmissionMutationOptions(options));
+    }
 

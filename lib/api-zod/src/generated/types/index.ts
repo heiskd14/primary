@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './admission';
+export * from './admissionInput';
 export * from './galleryItem';
 export * from './healthStatus';
 export * from './listEventsParams';

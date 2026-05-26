@@ -12,6 +12,7 @@ import NewsDetail from "@/pages/news-detail";
 import Staff from "@/pages/staff";
 import Gallery from "@/pages/gallery";
 import Contact from "@/pages/contact";
+import Apply from "@/pages/apply";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/staff" component={Staff} />
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
+      <Route path="/apply" component={Apply} />
       <Route component={NotFound} />
     </Switch>
   );

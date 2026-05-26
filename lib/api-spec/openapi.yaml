@@ -163,6 +163,27 @@ paths:
                 items:
                   $ref: "#/components/schemas/GalleryItem"
 
+  /admissions:
+    post:
+      operationId: submitAdmission
+      tags: [admissions]
+      summary: Submit an online admission application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdmissionInput"
+      responses:
+        "201":
+          description: Admission submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+        "400":
+          description: Invalid data
+
 components:
   schemas:
     HealthStatus:
@@ -262,4 +283,76 @@ components:
         category:
           type: string
         createdAt:
+          type: string
+
+    AdmissionInput:
+      type: object
+      required: [childFirstName, childLastName, childDob, childGender, classApplyingFor, parentName, parentRelationship, parentPhone, parentAddress]
+      properties:
+        childFirstName:
+          type: string
+        childLastName:
+          type: string
+        childDob:
+          type: string
+        childGender:
+          type: string
+        classApplyingFor:
+          type: string
+        previousSchool:
+          type: string
+        parentName:
+          type: string
+        parentRelationship:
+          type: string
+        parentPhone:
+          type: string
+        parentPhone2:
+          type: string
+        parentEmail:
+          type: string
+        parentAddress:
+          type: string
+        howDidYouHear:
+          type: string
+        additionalInfo:
+          type: string
+
+    Admission:
+      type: object
+      required: [id, childFirstName, childLastName, childDob, childGender, classApplyingFor, parentName, parentRelationship, parentPhone, parentAddress, status, submittedAt]
+      properties:
+        id:
+          type: integer
+        childFirstName:
+          type: string
+        childLastName:
+          type: string
+        childDob:
+          type: string
+        childGender:
+          type: string
+        classApplyingFor:
+          type: string
+        previousSchool:
+          type: string
+        parentName:
+          type: string
+        parentRelationship:
+          type: string
+        parentPhone:
+          type: string
+        parentPhone2:
+          type: string
+        parentEmail:
+          type: string
+        parentAddress:
+          type: string
+        howDidYouHear:
+          type: string
+        additionalInfo:
+          type: string
+        status:
+          type: string
+        submittedAt:
           type: string
