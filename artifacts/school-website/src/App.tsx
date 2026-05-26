@@ -13,6 +13,7 @@ import Staff from "@/pages/staff";
 import Gallery from "@/pages/gallery";
 import Contact from "@/pages/contact";
 import Apply from "@/pages/apply";
+import Admin from "@/pages/admin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/gallery" component={Gallery} />
       <Route path="/contact" component={Contact} />
       <Route path="/apply" component={Apply} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );

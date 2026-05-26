@@ -183,6 +183,46 @@ paths:
                 $ref: "#/components/schemas/Admission"
         "400":
           description: Invalid data
+    get:
+      operationId: listAdmissions
+      tags: [admissions]
+      summary: List all admission applications (admin)
+      responses:
+        "200":
+          description: List of admissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Admission"
+
+  /admissions/{id}:
+    patch:
+      operationId: updateAdmissionStatus
+      tags: [admissions]
+      summary: Update the status of an admission application (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdmissionStatusUpdate"
+      responses:
+        "200":
+          description: Updated admission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+        "404":
+          description: Not found
 
 components:
   schemas:
@@ -355,4 +395,11 @@ components:
         status:
           type: string
         submittedAt:
+          type: string
+
+    AdmissionStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
           type: string

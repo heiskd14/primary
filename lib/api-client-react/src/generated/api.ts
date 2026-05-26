@@ -22,6 +22,7 @@ import type {
 import type {
   Admission,
   AdmissionInput,
+  AdmissionStatusUpdate,
   GalleryItem,
   HealthStatus,
   ListEventsParams,
@@ -676,5 +677,154 @@ export const useSubmitAdmission = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getSubmitAdmissionMutationOptions(options));
+    }
+
+export const getListAdmissionsUrl = () => {
+
+
+
+
+  return `/api/admissions`
+}
+
+/**
+ * @summary List all admission applications (admin)
+ */
+export const listAdmissions = async ( options?: RequestInit): Promise<Admission[]> => {
+
+  return customFetch<Admission[]>(getListAdmissionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdmissionsQueryKey = () => {
+    return [
+    `/api/admissions`
+    ] as const;
+    }
+
+
+export const getListAdmissionsQueryOptions = <TData = Awaited<ReturnType<typeof listAdmissions>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdmissionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdmissions>>> = ({ signal }) => listAdmissions({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdmissions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdmissionsQueryResult = NonNullable<Awaited<ReturnType<typeof listAdmissions>>>
+export type ListAdmissionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all admission applications (admin)
+ */
+
+export function useListAdmissions<TData = Awaited<ReturnType<typeof listAdmissions>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdmissions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdmissionsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateAdmissionStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/admissions/${id}`
+}
+
+/**
+ * @summary Update the status of an admission application (admin)
+ */
+export const updateAdmissionStatus = async (id: number,
+    admissionStatusUpdate: AdmissionStatusUpdate, options?: RequestInit): Promise<Admission> => {
+
+  return customFetch<Admission>(getUpdateAdmissionStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      admissionStatusUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateAdmissionStatusMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdmissionStatus>>, TError,{id: number;data: BodyType<AdmissionStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAdmissionStatus>>, TError,{id: number;data: BodyType<AdmissionStatusUpdate>}, TContext> => {
+
+const mutationKey = ['updateAdmissionStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAdmissionStatus>>, {id: number;data: BodyType<AdmissionStatusUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateAdmissionStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdmissionStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdmissionStatus>>>
+    export type UpdateAdmissionStatusMutationBody = BodyType<AdmissionStatusUpdate>
+    export type UpdateAdmissionStatusMutationError = ErrorType<void>
+
+    /**
+ * @summary Update the status of an admission application (admin)
+ */
+export const useUpdateAdmissionStatus = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdmissionStatus>>, TError,{id: number;data: BodyType<AdmissionStatusUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAdmissionStatus>>,
+        TError,
+        {id: number;data: BodyType<AdmissionStatusUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateAdmissionStatusMutationOptions(options));
     }
 

@@ -8,6 +8,7 @@
 
 export * from './admission';
 export * from './admissionInput';
+export * from './admissionStatusUpdate';
 export * from './galleryItem';
 export * from './healthStatus';
 export * from './listEventsParams';

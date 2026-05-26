@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { db, admissionsTable } from "@workspace/db";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { insertAdmissionSchema } from "@workspace/db";
-
 const router = Router();
 
 router.post("/", async (req, res) => {
@@ -35,6 +34,24 @@ router.get("/", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Failed to list admissions");
     res.status(500).json({ error: "Failed to list admissions" });
+  }
+});
+
+router.patch("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = req.body as { status?: string };
+    if (!status || typeof status !== "string") return res.status(400).json({ error: "Invalid data" });
+    const results = await db
+      .update(admissionsTable)
+      .set({ status })
+      .where(eq(admissionsTable.id, id))
+      .returning();
+    if (results.length === 0) return res.status(404).json({ error: "Not found" });
+    res.json({ ...results[0], submittedAt: results[0].submittedAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update admission status");
+    res.status(500).json({ error: "Failed to update admission status" });
   }
 });
 

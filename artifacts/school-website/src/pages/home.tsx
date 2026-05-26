@@ -98,7 +98,7 @@ export default function Home() {
       <section className="bg-gray-50 py-8 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "Apply for Admission", icon: "📝", href: "/admissions" },
+            { label: "Apply for Admission", icon: "📝", href: "/apply" },
             { label: "Term Dates & News", icon: "📅", href: "/news" },
             { label: "Meet Our Teachers", icon: "👩‍🏫", href: "/staff" },
             { label: "Contact the School", icon: "📞", href: "/contact" },

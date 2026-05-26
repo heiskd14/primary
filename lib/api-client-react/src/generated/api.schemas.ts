@@ -94,6 +94,10 @@ export interface Admission {
   submittedAt: string;
 }
 
+export interface AdmissionStatusUpdate {
+  status: string;
+}
+
 export type ListNewsParams = {
 limit?: number;
 category?: string;

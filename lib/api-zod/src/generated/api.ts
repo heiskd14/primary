@@ -146,3 +146,60 @@ export const SubmitAdmissionBody = zod.object({
 })
 
 
+/**
+ * @summary List all admission applications (admin)
+ */
+export const ListAdmissionsResponseItem = zod.object({
+  "id": zod.number(),
+  "childFirstName": zod.string(),
+  "childLastName": zod.string(),
+  "childDob": zod.string(),
+  "childGender": zod.string(),
+  "classApplyingFor": zod.string(),
+  "previousSchool": zod.string().optional(),
+  "parentName": zod.string(),
+  "parentRelationship": zod.string(),
+  "parentPhone": zod.string(),
+  "parentPhone2": zod.string().optional(),
+  "parentEmail": zod.string().optional(),
+  "parentAddress": zod.string(),
+  "howDidYouHear": zod.string().optional(),
+  "additionalInfo": zod.string().optional(),
+  "status": zod.string(),
+  "submittedAt": zod.string()
+})
+export const ListAdmissionsResponse = zod.array(ListAdmissionsResponseItem)
+
+
+/**
+ * @summary Update the status of an admission application (admin)
+ */
+export const UpdateAdmissionStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAdmissionStatusBody = zod.object({
+  "status": zod.string()
+})
+
+export const UpdateAdmissionStatusResponse = zod.object({
+  "id": zod.number(),
+  "childFirstName": zod.string(),
+  "childLastName": zod.string(),
+  "childDob": zod.string(),
+  "childGender": zod.string(),
+  "classApplyingFor": zod.string(),
+  "previousSchool": zod.string().optional(),
+  "parentName": zod.string(),
+  "parentRelationship": zod.string(),
+  "parentPhone": zod.string(),
+  "parentPhone2": zod.string().optional(),
+  "parentEmail": zod.string().optional(),
+  "parentAddress": zod.string(),
+  "howDidYouHear": zod.string().optional(),
+  "additionalInfo": zod.string().optional(),
+  "status": zod.string(),
+  "submittedAt": zod.string()
+})
+
+
