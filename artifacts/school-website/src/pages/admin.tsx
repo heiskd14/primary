@@ -6,7 +6,7 @@ import { LogOut, Eye, EyeOff, CheckCircle, XCircle, Clock, ChevronDown, ChevronU
 
 const NAVY = "#1a237e";
 const RED = "#CC2200";
-const ADMIN_PASSWORD = "TripleTee@Admin";
+const ADMIN_PASSWORD = "king2024";
 
 type Admission = {
   id: number;
