@@ -15,6 +15,7 @@ import Contact from "@/pages/contact";
 import Apply from "@/pages/apply";
 import Admin from "@/pages/admin";
 import Portals from "@/pages/portals";
+import StudentPortal from "@/pages/student-portal";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/apply" component={Apply} />
       <Route path="/admin" component={Admin} />
       <Route path="/portals" component={Portals} />
+      <Route path="/student-portal" component={StudentPortal} />
       <Route component={NotFound} />
     </Switch>
   );

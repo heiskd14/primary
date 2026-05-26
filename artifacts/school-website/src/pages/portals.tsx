@@ -27,9 +27,8 @@ const portals = [
     iconBg: "#ede9fe",
     iconColor: "#7c3aed",
     borderColor: "#7c3aed",
-    href: "#",
+    href: "/student-portal",
     cta: "Access Portal",
-    comingSoon: true,
   },
   {
     title: "Staff Portal",
@@ -117,6 +116,14 @@ export default function Portals() {
                     <LogIn className="w-4 h-4" style={{ color: "#059669" }} />
                   </div>
                   <span className="text-sm font-semibold text-gray-700 group-hover:text-violet-700">Applicant Login</span>
+                  <ArrowRight className="w-4 h-4 ml-auto text-gray-300 group-hover:text-violet-500" />
+                </Link>
+                <Link href="/student-portal"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 hover:border-violet-200 hover:bg-violet-50 transition-all group">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: "#ede9fe" }}>
+                    <GraduationCap className="w-4 h-4" style={{ color: "#7c3aed" }} />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700 group-hover:text-violet-700">Student Login</span>
                   <ArrowRight className="w-4 h-4 ml-auto text-gray-300 group-hover:text-violet-500" />
                 </Link>
                 <Link href="/admin"
