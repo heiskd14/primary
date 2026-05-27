@@ -196,10 +196,6 @@ export async function sendStudentCredentialsEmail(opts: {
           </table>
         </div>
 
-        <div style="background: #fef3c7; border-left: 4px solid #d97706; border-radius: 6px; padding: 14px; margin: 20px 0; font-size: 13px; color: #374151;">
-          <strong>⚠️ Security Reminder:</strong> Please change the password after your first login. Do not share these credentials with anyone.
-        </div>
-
         <a href="${portalUrl}" style="display: inline-block; background-color: #16a34a; color: white; font-weight: bold; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none; margin-top: 8px;">
           Go to Student Portal →
         </a>
