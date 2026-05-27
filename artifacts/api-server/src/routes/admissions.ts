@@ -7,29 +7,9 @@ import { sendAdmissionNotification, sendStatusUpdateEmail, sendStudentCredential
 
 const router = Router();
 
-/**
- * The student logs in with the parent's real email address.
- * If that email already has an account (same parent, different child),
- * we append +firstname to the local part so it's still deliverable
- * to the same Gmail inbox (Gmail ignores + aliases).
- */
-async function resolvePortalEmail(parentEmail: string, firstName: string): Promise<string> {
-  const base = parentEmail.toLowerCase().trim();
-
-  // Check if parentEmail already has an account
-  const existing = await db
-    .select({ id: studentAccountsTable.id })
-    .from(studentAccountsTable)
-    .where(eq(studentAccountsTable.email, base));
-
-  if (existing.length === 0) return base;
-
-  // Same parent enrolling a second child — use +firstname alias
-  const at = base.indexOf("@");
-  const local = base.slice(0, at);
-  const domain = base.slice(at);
-  const alias = `${local}+${firstName.toLowerCase().replace(/[^a-z]/g, "")}${domain}`;
-  return alias;
+function generateStudentEmail(firstName: string, lastName: string): string {
+  const clean = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return `${clean(lastName)}.${clean(firstName)}@st.ttt.edu.ng`;
 }
 
 function generatePassword(firstName: string, lastName: string): string {
@@ -92,7 +72,6 @@ router.patch("/:id", async (req, res) => {
     const updated = { ...results[0], submittedAt: results[0].submittedAt.toISOString() };
     res.json(updated);
 
-    // Congratulations / status-update email
     if (updated.parentEmail && ["reviewed", "accepted", "rejected"].includes(status)) {
       sendStatusUpdateEmail({
         childFirstName: updated.childFirstName,
@@ -110,43 +89,39 @@ router.patch("/:id", async (req, res) => {
     if (status === "accepted" && updated.parentEmail) {
       (async () => {
         try {
-          // Check if a student account already exists for this admission
-          const alreadyExists = await db
+          const studentEmail = generateStudentEmail(updated.childFirstName, updated.childLastName);
+          const plainPassword = generatePassword(updated.childFirstName, updated.childLastName);
+          const passwordHash = await bcrypt.hash(plainPassword, 10);
+
+          // Upsert: if account already exists (re-acceptance), skip creation
+          const existing = await db
             .select({ id: studentAccountsTable.id })
             .from(studentAccountsTable)
             .where(eq(studentAccountsTable.admissionId, updated.id));
 
-          if (alreadyExists.length > 0) {
-            req.log.info({ admissionId: updated.id }, "Student account already exists – skipping credential email");
-            return;
+          if (existing.length === 0) {
+            await db.insert(studentAccountsTable).values({
+              admissionId: updated.id,
+              email: studentEmail,
+              passwordHash,
+              firstName: updated.childFirstName,
+              lastName: updated.childLastName,
+              classLevel: updated.classApplyingFor,
+            });
+
+            await sendStudentCredentialsEmail({
+              parentName: updated.parentName,
+              parentEmail: updated.parentEmail,
+              childFirstName: updated.childFirstName,
+              childLastName: updated.childLastName,
+              classLevel: updated.classApplyingFor,
+              studentEmail,
+              plainPassword,
+            });
           }
-
-          const portalEmail = await resolvePortalEmail(updated.parentEmail, updated.childFirstName);
-          const plainPassword = generatePassword(updated.childFirstName, updated.childLastName);
-          const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-          await db.insert(studentAccountsTable).values({
-            admissionId: updated.id,
-            email: portalEmail,
-            passwordHash,
-            firstName: updated.childFirstName,
-            lastName: updated.childLastName,
-            classLevel: updated.classApplyingFor,
-          });
-
-          await sendStudentCredentialsEmail({
-            parentName: updated.parentName,
-            parentEmail: updated.parentEmail,
-            childFirstName: updated.childFirstName,
-            childLastName: updated.childLastName,
-            classLevel: updated.classApplyingFor,
-            portalEmail,
-            plainPassword,
-          });
-
-          req.log.info({ admissionId: updated.id, portalEmail }, "Student account created and credentials emailed");
         } catch (err) {
-          req.log.error({ err }, "Failed to create student account or send credentials email");
+          // Log but don't crash — the status update already succeeded
+          console.error("Failed to create student account or send credentials email:", err);
         }
       })();
     }

@@ -484,7 +484,7 @@ function LoginPage({ onLogin }: { onLogin: (s: Session) => void }) {
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
                     type="email"
-                    placeholder="Your email address"
+                    placeholder="surname.firstname@st.ttt.edu.ng"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     required
@@ -626,7 +626,7 @@ function ForgotPasswordModal({ onClose }: { onClose: () => void }) {
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type="email"
-                      placeholder="Your email address"
+                      placeholder="surname.firstname@st.ttt.edu.ng"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
