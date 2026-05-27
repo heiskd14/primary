@@ -52,7 +52,14 @@ router.put("/", async (req, res) => {
     await db.delete(timetableTable).where(eq(timetableTable.classLevel, classLevel));
 
     if (rows.length > 0) {
-      await db.insert(timetableTable).values(rows.map(r => ({ ...r, classLevel })));
+      await db.insert(timetableTable).values(
+        rows.map(({ timeSlot, monday, tuesday, wednesday, thursday, friday, displayOrder, isBreak }) => ({
+          classLevel, timeSlot,
+          monday: monday ?? "", tuesday: tuesday ?? "", wednesday: wednesday ?? "",
+          thursday: thursday ?? "", friday: friday ?? "",
+          displayOrder: displayOrder ?? 0, isBreak: isBreak ?? 0,
+        })),
+      );
     }
 
     res.json({ ok: true });
