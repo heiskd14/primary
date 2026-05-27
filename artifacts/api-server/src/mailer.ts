@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 
+const FROM = '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>';
+const SCHOOL_URL = process.env.SCHOOL_URL ?? "https://triple-tee-montessori-academy.replit.app";
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -8,12 +11,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const SCHOOL_URL = process.env.SCHOOL_URL ?? "https://triple-tee-montessori-academy.replit.app";
-
 const FOOTER = `
   <div style="background-color: #CC2200; padding: 14px; text-align: center;">
-    <p style="color: white; margin: 0; font-size: 13px;">Triple Tee Montessori Academy · Opp. Winners Chapel, Oke-Ola, Oro, Kwara State</p>
-    <p style="color: #ffc5bb; margin: 4px 0 0; font-size: 12px;">07036500419 · 08032348460 · tripleteeschools@gmail.com</p>
+    <p style="color: white; margin: 0; font-size: 13px;">Triple Tee Montessori Academy &nbsp;·&nbsp; Opp. Winners Chapel, Oke-Ola, Oro, Kwara State</p>
+    <p style="color: #ffc5bb; margin: 4px 0 0; font-size: 12px;">07036500419 &nbsp;·&nbsp; 08032348460 &nbsp;·&nbsp; tripleteeschools@gmail.com</p>
   </div>
 `;
 
@@ -76,7 +77,7 @@ export async function sendAdmissionNotification(admission: {
   `;
 
   await transporter.sendMail({
-    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
+    from: FROM,
     to: ["tripleteeschools@gmail.com", "okeyodekingdavid@gmail.com"],
     subject,
     html,
@@ -142,12 +143,7 @@ export async function sendStatusUpdateEmail(admission: {
     </div>
   `;
 
-  await transporter.sendMail({
-    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
-    to: admission.parentEmail,
-    subject,
-    html,
-  });
+  await transporter.sendMail({ from: FROM, to: admission.parentEmail, subject, html });
 }
 
 export async function sendStudentCredentialsEmail(opts: {
@@ -156,7 +152,7 @@ export async function sendStudentCredentialsEmail(opts: {
   childFirstName: string;
   childLastName: string;
   classLevel: string;
-  studentEmail: string;
+  portalEmail: string;
   plainPassword: string;
 }) {
   const subject = `🎓 Student Portal Login Details — ${opts.childFirstName} ${opts.childLastName}`;
@@ -173,53 +169,53 @@ export async function sendStudentCredentialsEmail(opts: {
         <p style="font-size: 15px; color: #374151; margin: 0 0 16px;">Dear <strong>${opts.parentName}</strong>,</p>
         <p style="font-size: 15px; color: #374151; margin: 0 0 20px; line-height: 1.6;">
           Your child <strong>${opts.childFirstName} ${opts.childLastName}</strong> (${opts.classLevel}) now has access to the Triple Tee Montessori Academy Student Portal.
-          Use the credentials below to sign in and access academic records, timetables, and school notices.
+          Use the details below to sign in. You will use your own email address as the login.
         </p>
 
         <div style="background: #f0f4ff; border: 2px solid #1a237e; border-radius: 12px; padding: 20px; margin: 24px 0;">
-          <h2 style="color: #1a237e; font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.05em;">Login Credentials</h2>
+          <h2 style="color: #1a237e; font-size: 15px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: 0.05em;">🔐 Your Login Credentials</h2>
           <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
             <tr>
-              <td style="color: #6b7280; padding: 6px 0; width: 35%;">Portal URL</td>
-              <td style="color: #1a237e; font-weight: bold;">
-                <a href="${portalUrl}" style="color: #1a237e;">${portalUrl}</a>
+              <td style="color: #6b7280; padding: 8px 0; width: 30%; vertical-align: top;">Portal URL</td>
+              <td style="padding: 8px 0;">
+                <a href="${portalUrl}" style="color: #1a237e; font-weight: bold;">${portalUrl}</a>
               </td>
             </tr>
-            <tr>
-              <td style="color: #6b7280; padding: 6px 0;">Email Address</td>
-              <td style="color: #111827; font-weight: bold; font-size: 15px;">${opts.studentEmail}</td>
+            <tr style="border-top: 1px solid #e5e7eb;">
+              <td style="color: #6b7280; padding: 8px 0; vertical-align: top;">Login Email</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #111827; font-size: 15px;">${opts.portalEmail}</td>
             </tr>
-            <tr>
-              <td style="color: #6b7280; padding: 6px 0;">Password</td>
-              <td style="color: #111827; font-weight: bold; font-size: 15px; font-family: monospace; background: #fff; padding: 4px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">${opts.plainPassword}</td>
+            <tr style="border-top: 1px solid #e5e7eb;">
+              <td style="color: #6b7280; padding: 8px 0; vertical-align: top;">Password</td>
+              <td style="padding: 8px 0;">
+                <span style="font-family: monospace; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 10px; font-size: 16px; font-weight: bold; color: #111827; letter-spacing: 0.05em;">${opts.plainPassword}</span>
+              </td>
             </tr>
           </table>
         </div>
 
-        <div style="background: #fef3c7; border-left: 4px solid #d97706; border-radius: 6px; padding: 14px; margin: 20px 0; font-size: 13px; color: #374151;">
-          <strong>⚠️ Security Reminder:</strong> Please change the password after your first login. Do not share these credentials with anyone.
+        <div style="background: #fef3c7; border-left: 4px solid #d97706; border-radius: 6px; padding: 14px; margin-bottom: 20px; font-size: 13px; color: #374151;">
+          <strong>⚠️ Security Notice:</strong> Please change your password after your first login using the "Forgot password?" link on the portal. Do not share these credentials with anyone.
         </div>
 
-        <a href="${portalUrl}" style="display: inline-block; background-color: #16a34a; color: white; font-weight: bold; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none; margin-top: 8px;">
-          Go to Student Portal →
-        </a>
+        <div style="text-align: center; margin: 24px 0;">
+          <a href="${portalUrl}" style="display: inline-block; background-color: #16a34a; color: white; font-weight: bold; font-size: 15px; padding: 13px 32px; border-radius: 10px; text-decoration: none;">
+            Open Student Portal →
+          </a>
+        </div>
 
-        <p style="font-size: 13px; color: #6b7280; margin-top: 28px; line-height: 1.6;">
-          If you have any issues logging in, please contact us:<br/>
+        <p style="font-size: 13px; color: #6b7280; margin-top: 24px; line-height: 1.8;">
+          For help or issues logging in, contact us:<br/>
           📞 07036500419 &nbsp;|&nbsp; 08032348460<br/>
-          ✉️ tripleteeschools@gmail.com
+          ✉️ tripleteeschools@gmail.com<br/>
+          📍 Opp. Winners Chapel, Oke-Ola, Oro, Kwara State
         </p>
       </div>
       ${FOOTER}
     </div>
   `;
 
-  await transporter.sendMail({
-    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
-    to: opts.parentEmail,
-    subject,
-    html,
-  });
+  await transporter.sendMail({ from: FROM, to: opts.parentEmail, subject, html });
 }
 
 export async function sendPasswordResetEmail(opts: {
@@ -236,7 +232,7 @@ export async function sendPasswordResetEmail(opts: {
       <div style="background-color: #1a237e; padding: 28px; text-align: center;">
         <div style="font-size: 40px; margin-bottom: 8px;">🔑</div>
         <h1 style="color: white; margin: 0; font-size: 20px;">Password Reset Request</h1>
-        <p style="color: #bfcfff; margin: 8px 0 0; font-size: 14px;">Triple Tee Montessori Academy Student Portal</p>
+        <p style="color: #bfcfff; margin: 8px 0 0; font-size: 14px;">Triple Tee Montessori Academy — Student Portal</p>
       </div>
       <div style="padding: 28px;">
         <p style="font-size: 15px; color: #374151; margin: 0 0 16px;">Hello <strong>${opts.firstName} ${opts.lastName}</strong>,</p>
@@ -252,7 +248,7 @@ export async function sendPasswordResetEmail(opts: {
         </div>
 
         <p style="font-size: 13px; color: #6b7280; margin-top: 20px; line-height: 1.6;">
-          If the button doesn't work, copy and paste this link into your browser:<br/>
+          If the button doesn't work, copy and paste this link:<br/>
           <a href="${resetUrl}" style="color: #1a237e; word-break: break-all;">${resetUrl}</a>
         </p>
 
@@ -264,10 +260,5 @@ export async function sendPasswordResetEmail(opts: {
     </div>
   `;
 
-  await transporter.sendMail({
-    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
-    to: opts.email,
-    subject,
-    html,
-  });
+  await transporter.sendMail({ from: FROM, to: opts.email, subject, html });
 }
