@@ -8,6 +8,9 @@ import admissionsRouter from "./admissions";
 import schoolLifeRouter from "./school_life";
 import siteContentRouter from "./site_content";
 import studentAuthRouter from "./student_auth";
+import resultsRouter from "./results";
+import attendanceRouter from "./attendance";
+import timetableRouter from "./timetable";
 
 const router: IRouter = Router();
 
@@ -20,5 +23,8 @@ router.use("/admissions", admissionsRouter);
 router.use("/school-life", schoolLifeRouter);
 router.use("/site-content", siteContentRouter);
 router.use("/student", studentAuthRouter);
+router.use("/results", resultsRouter);
+router.use("/attendance", attendanceRouter);
+router.use("/timetable", timetableRouter);
 
 export default router;

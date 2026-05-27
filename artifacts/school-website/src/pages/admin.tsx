@@ -5,7 +5,7 @@ import { getListAdmissionsQueryKey } from "@workspace/api-client-react";
 import {
   LogOut, Eye, EyeOff, CheckCircle, XCircle, Clock, ChevronDown, ChevronUp,
   Loader2, RefreshCw, Plus, Pencil, Trash2, X, Save, Newspaper, ImageIcon,
-  Users, Calendar, BookOpen, Info,
+  Users, Calendar, BookOpen, Info, GraduationCap, ClipboardList, LayoutGrid, UserCheck,
 } from "lucide-react";
 
 const NAVY = "#1a237e";
@@ -883,16 +883,544 @@ function AboutTab() {
   );
 }
 
+// ─── Shared constants ─────────────────────────────────────────────────────────
+
+const CLASS_OPTIONS = ["Creche", "Toddler", "Nursery 1", "Nursery 2", "Kindergarten", "Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5"];
+const CLASS_ORDER = CLASS_OPTIONS; // alias for promotion logic
+const TERM_OPTIONS = ["First Term", "Second Term", "Third Term"];
+const CURRENT_YEAR = "2025/2026";
+const RESULT_SUBJECTS = [
+  "English Language", "Mathematics", "Basic Science & Technology",
+  "Social Studies", "Christian Religious Studies", "Yoruba Language",
+  "Cultural & Creative Arts", "Physical & Health Education",
+  "Computer Studies", "Vocational Aptitude",
+];
+
+// ─── Results Tab ──────────────────────────────────────────────────────────────
+
+type StudentRow = { id: number; firstName: string; lastName: string; email: string; classLevel: string };
+type ScoreMap = Record<number, Record<string, { ca: string; exam: string }>>;
+
+function ResultsTab() {
+  const [cls, setCls] = useState(CLASS_OPTIONS[5]);
+  const [term, setTerm] = useState(TERM_OPTIONS[0]);
+  const [year, setYear] = useState(CURRENT_YEAR);
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [scores, setScores] = useState<ScoreMap>({});
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [promoteCls, setPromoteCls] = useState(CLASS_OPTIONS[5]);
+  const [promoting, setPromoting] = useState(false);
+  const [promoteResult, setPromoteResult] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true); setSaved(false);
+    try {
+      const [studs, results] = await Promise.all([
+        apiFetch(`/student/list?classLevel=${encodeURIComponent(cls)}`),
+        apiFetch(`/results?classLevel=${encodeURIComponent(cls)}&term=${encodeURIComponent(term)}&academicYear=${encodeURIComponent(year)}`),
+      ]);
+      setStudents(studs);
+      const newScores: ScoreMap = {};
+      for (const s of studs) {
+        newScores[s.id] = {};
+        for (const subj of RESULT_SUBJECTS) newScores[s.id][subj] = { ca: "", exam: "" };
+      }
+      for (const r of results as { studentAccountId: number; subject: string; caScore: number; examScore: number }[]) {
+        if (newScores[r.studentAccountId]) {
+          newScores[r.studentAccountId][r.subject] = { ca: String(r.caScore ?? ""), exam: String(r.examScore ?? "") };
+        }
+      }
+      setScores(newScores);
+      setExpanded(studs[0]?.id ?? null);
+    } finally { setLoading(false); }
+  }
+
+  function setScore(studentId: number, subject: string, field: "ca" | "exam", val: string) {
+    setScores(prev => ({
+      ...prev,
+      [studentId]: { ...(prev[studentId] ?? {}), [subject]: { ...(prev[studentId]?.[subject] ?? { ca: "", exam: "" }), [field]: val } },
+    }));
+  }
+
+  async function saveAll() {
+    setSaving(true); setSaved(false);
+    try {
+      const entries = students.map(s => ({
+        studentAccountId: s.id, term, academicYear: year, classLevel: cls,
+        subjects: RESULT_SUBJECTS.map(subj => ({
+          subject: subj,
+          caScore: Number(scores[s.id]?.[subj]?.ca) || 0,
+          examScore: Number(scores[s.id]?.[subj]?.exam) || 0,
+        })),
+      }));
+      await apiFetch("/results/bulk", { method: "PUT", body: JSON.stringify(entries) });
+      setSaved(true); setTimeout(() => setSaved(false), 3000);
+    } finally { setSaving(false); }
+  }
+
+  async function promote() {
+    const nextIdx = CLASS_ORDER.indexOf(promoteCls) + 1;
+    if (nextIdx <= 0 || nextIdx >= CLASS_ORDER.length) return;
+    const next = CLASS_ORDER[nextIdx];
+    if (!window.confirm(`Promote ALL students in "${promoteCls}" to "${next}"? This cannot be undone.`)) return;
+    setPromoting(true); setPromoteResult(null);
+    try {
+      await apiFetch("/student/promote", { method: "POST", body: JSON.stringify({ classLevel: promoteCls }) });
+      setPromoteResult(`✅ All "${promoteCls}" students promoted to "${next}".`);
+    } catch { setPromoteResult("❌ Promotion failed. Try again."); }
+    finally { setPromoting(false); }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold" style={{ color: NAVY }}>Results Entry</h2>
+      </div>
+
+      {/* Filter bar */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-end">
+        <div className="flex-1 min-w-[140px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Class</label>
+          <select className={inputCls} value={cls} onChange={e => setCls(e.target.value)}>
+            {CLASS_OPTIONS.map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Term</label>
+          <select className={inputCls} value={term} onChange={e => setTerm(e.target.value)}>
+            {TERM_OPTIONS.map(t => <option key={t}>{t}</option>)}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[120px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Academic Year</label>
+          <input className={inputCls} value={year} onChange={e => setYear(e.target.value)} placeholder="e.g. 2025/2026" />
+        </div>
+        <Btn onClick={load} disabled={loading}>
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Load Students
+        </Btn>
+      </div>
+
+      {/* Students */}
+      {students.length === 0 && !loading && (
+        <EmptyState icon="🎓" text='Select class, term & year then click "Load Students"' />
+      )}
+      {loading && <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>}
+
+      {students.length > 0 && !loading && (
+        <>
+          <div className="space-y-2 mb-5">
+            {students.map(s => {
+              const isOpen = expanded === s.id;
+              const subScores = scores[s.id] ?? {};
+              return (
+                <div key={s.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  <button onClick={() => setExpanded(isOpen ? null : s.id)}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                      style={{ backgroundColor: NAVY }}>
+                      {(s.firstName[0] + s.lastName[0]).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900 text-sm">{s.firstName} {s.lastName}</div>
+                      <div className="text-xs text-gray-400">{s.email}</div>
+                    </div>
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-gray-100 px-4 pb-4">
+                      <div className="overflow-x-auto mt-3">
+                        <table className="w-full text-sm min-w-[520px]">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase w-48">Subject</th>
+                              <th className="px-3 py-2 text-center text-xs font-bold text-gray-500 uppercase w-24">CA (max 30)</th>
+                              <th className="px-3 py-2 text-center text-xs font-bold text-gray-500 uppercase w-24">Exam (max 70)</th>
+                              <th className="px-3 py-2 text-center text-xs font-bold text-gray-500 uppercase w-20">Total</th>
+                              <th className="px-3 py-2 text-center text-xs font-bold text-gray-500 uppercase w-16">Grade</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {RESULT_SUBJECTS.map(subj => {
+                              const sc = subScores[subj] ?? { ca: "", exam: "" };
+                              const ca = Number(sc.ca) || 0;
+                              const exam = Number(sc.exam) || 0;
+                              const total = ca + exam;
+                              const grade = total >= 70 ? "A" : total >= 60 ? "B" : total >= 50 ? "C" : total >= 45 ? "D" : (ca || exam) ? "F" : "—";
+                              const gradeColor = grade === "A" ? "#16a34a" : grade === "B" ? "#2563eb" : grade === "C" ? "#d97706" : grade === "F" ? RED : "#6b7280";
+                              return (
+                                <tr key={subj} className="border-t border-gray-100">
+                                  <td className="px-3 py-1.5 text-gray-700 text-xs">{subj}</td>
+                                  <td className="px-3 py-1.5 text-center">
+                                    <input type="number" min={0} max={30} value={sc.ca}
+                                      onChange={e => setScore(s.id, subj, "ca", e.target.value)}
+                                      className="w-16 border border-gray-200 rounded px-2 py-1 text-center text-xs focus:outline-none focus:border-[#1a237e]" />
+                                  </td>
+                                  <td className="px-3 py-1.5 text-center">
+                                    <input type="number" min={0} max={70} value={sc.exam}
+                                      onChange={e => setScore(s.id, subj, "exam", e.target.value)}
+                                      className="w-16 border border-gray-200 rounded px-2 py-1 text-center text-xs focus:outline-none focus:border-[#1a237e]" />
+                                  </td>
+                                  <td className="px-3 py-1.5 text-center font-bold text-sm" style={{ color: gradeColor }}>{ca || exam ? total : "—"}</td>
+                                  <td className="px-3 py-1.5 text-center">
+                                    <span className="text-xs font-bold" style={{ color: gradeColor }}>{grade}</span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400">{students.length} student{students.length !== 1 ? "s" : ""} · {term} · {year}</p>
+            <Btn onClick={saveAll} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {saved ? "Saved!" : "Save All Results"}
+            </Btn>
+          </div>
+        </>
+      )}
+
+      {/* Class Promotion */}
+      <div className="mt-10 bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <h3 className="font-bold text-amber-900 mb-1 flex items-center gap-2"><GraduationCap className="w-5 h-5" /> Class Promotion</h3>
+        <p className="text-xs text-amber-700 mb-4">After Third Term, promote all students in a class to the next class level. This updates their class in the student portal.</p>
+        <div className="flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="block text-xs font-semibold text-amber-800 mb-1">Class to Promote</label>
+            <select className={inputCls} value={promoteCls} onChange={e => setPromoteCls(e.target.value)}>
+              {CLASS_ORDER.slice(0, -1).map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <Btn variant="danger" onClick={promote} disabled={promoting}>
+            {promoting ? <Loader2 className="w-4 h-4 animate-spin" /> : <GraduationCap className="w-4 h-4" />}
+            Promote to {CLASS_ORDER[CLASS_ORDER.indexOf(promoteCls) + 1] ?? "—"}
+          </Btn>
+        </div>
+        {promoteResult && <p className="mt-3 text-sm font-semibold" style={{ color: promoteResult.startsWith("✅") ? "#166534" : RED }}>{promoteResult}</p>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Attendance Tab ───────────────────────────────────────────────────────────
+
+type AttendanceEntry = { status: "present" | "absent" | "late"; remark: string };
+
+function AttendanceTab() {
+  const [cls, setCls] = useState(CLASS_OPTIONS[5]);
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [term, setTerm] = useState(TERM_OPTIONS[2]);
+  const [year, setYear] = useState(CURRENT_YEAR);
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [attendance, setAttendance] = useState<Record<number, AttendanceEntry>>({});
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function load() {
+    setLoading(true); setSaved(false);
+    try {
+      const [studs, existing] = await Promise.all([
+        apiFetch(`/student/list?classLevel=${encodeURIComponent(cls)}`),
+        apiFetch(`/attendance?classLevel=${encodeURIComponent(cls)}&date=${date}`),
+      ]);
+      setStudents(studs);
+      const map: Record<number, AttendanceEntry> = {};
+      for (const s of studs) map[s.id] = { status: "present", remark: "" };
+      for (const e of existing as { studentAccountId: number; status: string; remark: string }[]) {
+        if (map[e.studentAccountId]) map[e.studentAccountId] = { status: e.status as AttendanceEntry["status"], remark: e.remark ?? "" };
+      }
+      setAttendance(map);
+    } finally { setLoading(false); }
+  }
+
+  function setStatus(id: number, status: AttendanceEntry["status"]) {
+    setAttendance(prev => ({ ...prev, [id]: { ...(prev[id] ?? { status: "present", remark: "" }), status } }));
+  }
+  function setRemark(id: number, remark: string) {
+    setAttendance(prev => ({ ...prev, [id]: { ...(prev[id] ?? { status: "present", remark: "" }), remark } }));
+  }
+
+  async function save() {
+    setSaving(true); setSaved(false);
+    try {
+      await apiFetch("/attendance/bulk", {
+        method: "PUT",
+        body: JSON.stringify({
+          date, term, academicYear: year, classLevel: cls,
+          entries: students.map(s => ({ studentAccountId: s.id, status: attendance[s.id]?.status ?? "present", remark: attendance[s.id]?.remark ?? "" })),
+        }),
+      });
+      setSaved(true); setTimeout(() => setSaved(false), 3000);
+    } finally { setSaving(false); }
+  }
+
+  const statusCfg = {
+    present: { label: "Present", bg: "#d1fae5", color: "#166534" },
+    absent:  { label: "Absent",  bg: "#fee2e2", color: "#991b1b" },
+    late:    { label: "Late",    bg: "#fef3c7", color: "#92400e" },
+  } as const;
+
+  const counts = students.reduce((acc, s) => {
+    const st = attendance[s.id]?.status ?? "present";
+    acc[st] = (acc[st] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold" style={{ color: NAVY }}>Attendance</h2>
+      </div>
+
+      {/* Filter bar */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-end">
+        <div className="flex-1 min-w-[140px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Class</label>
+          <select className={inputCls} value={cls} onChange={e => setCls(e.target.value)}>
+            {CLASS_OPTIONS.map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="flex-1 min-w-[140px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Date</label>
+          <input type="date" className={inputCls} value={date} onChange={e => setDate(e.target.value)} />
+        </div>
+        <div className="flex-1 min-w-[130px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Term</label>
+          <select className={inputCls} value={term} onChange={e => setTerm(e.target.value)}>
+            {TERM_OPTIONS.map(t => <option key={t}>{t}</option>)}
+          </select>
+        </div>
+        <div className="w-28">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Year</label>
+          <input className={inputCls} value={year} onChange={e => setYear(e.target.value)} />
+        </div>
+        <Btn onClick={load} disabled={loading}>
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Load
+        </Btn>
+      </div>
+
+      {students.length === 0 && !loading && (
+        <EmptyState icon="📋" text='Select class & date then click "Load"' />
+      )}
+      {loading && <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>}
+
+      {students.length > 0 && !loading && (
+        <>
+          {/* Summary chips */}
+          <div className="flex gap-3 mb-4">
+            {(["present", "absent", "late"] as const).map(st => (
+              <div key={st} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold"
+                style={{ backgroundColor: statusCfg[st].bg, color: statusCfg[st].color }}>
+                {statusCfg[st].label}: {counts[st] ?? 0}
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-5">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Student</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Remark (optional)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s, i) => {
+                  const a = attendance[s.id] ?? { status: "present" as const, remark: "" };
+                  return (
+                    <tr key={s.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-gray-900 text-sm">{s.firstName} {s.lastName}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-center gap-1.5">
+                          {(["present", "absent", "late"] as const).map(st => (
+                            <button key={st} onClick={() => setStatus(s.id, st)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-bold border-2 transition-all"
+                              style={{
+                                borderColor: a.status === st ? statusCfg[st].color : "#e5e7eb",
+                                backgroundColor: a.status === st ? statusCfg[st].bg : "white",
+                                color: a.status === st ? statusCfg[st].color : "#9ca3af",
+                              }}>
+                              {statusCfg[st].label}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <input className="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1a237e]"
+                          value={a.remark} onChange={e => setRemark(s.id, e.target.value)} placeholder="Optional note…" />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-400">{students.length} student{students.length !== 1 ? "s" : ""} · {new Date(date).toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}</p>
+            <Btn onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {saved ? "Saved!" : "Save Attendance"}
+            </Btn>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Timetable Tab ────────────────────────────────────────────────────────────
+
+type TRow = { timeSlot: string; monday: string; tuesday: string; wednesday: string; thursday: string; friday: string; displayOrder: number; isBreak: number };
+const DAYS_COLS: { key: keyof TRow; label: string }[] = [
+  { key: "monday", label: "Monday" }, { key: "tuesday", label: "Tuesday" },
+  { key: "wednesday", label: "Wednesday" }, { key: "thursday", label: "Thursday" },
+  { key: "friday", label: "Friday" },
+];
+const EMPTY_ROW: TRow = { timeSlot: "", monday: "", tuesday: "", wednesday: "", thursday: "", friday: "", displayOrder: 0, isBreak: 0 };
+
+function TimetableTab() {
+  const [cls, setCls] = useState(CLASS_OPTIONS[5]);
+  const [rows, setRows] = useState<TRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function load() {
+    setLoading(true); setSaved(false);
+    try {
+      const data = await apiFetch(`/timetable?classLevel=${encodeURIComponent(cls)}`);
+      setRows((data as TRow[]).map((r, i) => ({ ...EMPTY_ROW, ...r, displayOrder: i })));
+    } finally { setLoading(false); }
+  }
+
+  function updateRow(i: number, field: keyof TRow, val: string | number) {
+    setRows(prev => prev.map((r, idx) => idx === i ? { ...r, [field]: val } : r));
+  }
+
+  function addRow() {
+    setRows(prev => [...prev, { ...EMPTY_ROW, displayOrder: prev.length }]);
+  }
+
+  function removeRow(i: number) {
+    setRows(prev => prev.filter((_, idx) => idx !== i).map((r, idx) => ({ ...r, displayOrder: idx })));
+  }
+
+  async function save() {
+    setSaving(true); setSaved(false);
+    try {
+      await apiFetch("/timetable", { method: "PUT", body: JSON.stringify({ classLevel: cls, rows: rows.map((r, i) => ({ ...r, displayOrder: i })) }) });
+      setSaved(true); setTimeout(() => setSaved(false), 3000);
+    } finally { setSaving(false); }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-bold" style={{ color: NAVY }}>Timetable Editor</h2>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-end">
+        <div className="flex-1 min-w-[180px]">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">Class</label>
+          <select className={inputCls} value={cls} onChange={e => setCls(e.target.value)}>
+            {CLASS_OPTIONS.map(c => <option key={c}>{c}</option>)}
+          </select>
+        </div>
+        <Btn onClick={load} disabled={loading}>
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />} Load Timetable
+        </Btn>
+      </div>
+
+      {rows.length === 0 && !loading && (
+        <EmptyState icon="📅" text='Select a class and click "Load Timetable"' />
+      )}
+      {loading && <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-400" /></div>}
+
+      {rows.length > 0 && !loading && (
+        <>
+          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[750px]">
+                <thead>
+                  <tr style={{ backgroundColor: NAVY }}>
+                    <th className="px-3 py-3 text-left text-xs font-bold text-blue-200 w-32">Time Slot</th>
+                    {DAYS_COLS.map(d => <th key={d.key} className="px-3 py-3 text-left text-xs font-bold text-blue-200">{d.label}</th>)}
+                    <th className="px-3 py-3 text-center text-xs font-bold text-blue-200 w-20">Break?</th>
+                    <th className="w-10" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, i) => (
+                    <tr key={i} className={row.isBreak ? "bg-amber-50" : i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                      <td className="px-2 py-1.5 border-r border-gray-100">
+                        <input className="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1a237e]"
+                          value={row.timeSlot} onChange={e => updateRow(i, "timeSlot", e.target.value)} placeholder="e.g. 8:00 – 9:00" />
+                      </td>
+                      {DAYS_COLS.map(d => (
+                        <td key={d.key} className="px-2 py-1.5 border-r border-gray-100">
+                          <input className="w-full border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1a237e]"
+                            value={row[d.key] as string} onChange={e => updateRow(i, d.key, e.target.value)} />
+                        </td>
+                      ))}
+                      <td className="px-2 py-1.5 text-center border-r border-gray-100">
+                        <input type="checkbox" checked={!!row.isBreak}
+                          onChange={e => updateRow(i, "isBreak", e.target.checked ? 1 : 0)}
+                          className="w-4 h-4 cursor-pointer" />
+                      </td>
+                      <td className="px-2 py-1.5 text-center">
+                        <button onClick={() => removeRow(i)} className="p-1 text-gray-400 hover:text-red-500 rounded hover:bg-red-50">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Btn variant="outline" onClick={addRow}><Plus className="w-4 h-4" /> Add Row</Btn>
+            <Btn onClick={save} disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {saved ? "Saved!" : "Save Timetable"}
+            </Btn>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Admin Dashboard ──────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "admissions", label: "Admissions", icon: <CheckCircle className="w-4 h-4" /> },
-  { id: "news", label: "News", icon: <Newspaper className="w-4 h-4" /> },
-  { id: "events", label: "Events & Speeches", icon: <Calendar className="w-4 h-4" /> },
-  { id: "gallery", label: "Gallery", icon: <ImageIcon className="w-4 h-4" /> },
-  { id: "staff", label: "Staff", icon: <Users className="w-4 h-4" /> },
-  { id: "school-life", label: "School Life", icon: <BookOpen className="w-4 h-4" /> },
-  { id: "about", label: "About Us", icon: <Info className="w-4 h-4" /> },
+  { id: "admissions",  label: "Admissions",      icon: <CheckCircle className="w-4 h-4" /> },
+  { id: "news",        label: "News",             icon: <Newspaper className="w-4 h-4" /> },
+  { id: "events",      label: "Events & Speeches",icon: <Calendar className="w-4 h-4" /> },
+  { id: "gallery",     label: "Gallery",          icon: <ImageIcon className="w-4 h-4" /> },
+  { id: "staff",       label: "Staff",            icon: <Users className="w-4 h-4" /> },
+  { id: "school-life", label: "School Life",      icon: <BookOpen className="w-4 h-4" /> },
+  { id: "about",       label: "About Us",         icon: <Info className="w-4 h-4" /> },
+  { id: "results",     label: "Results",          icon: <ClipboardList className="w-4 h-4" /> },
+  { id: "attendance",  label: "Attendance",       icon: <UserCheck className="w-4 h-4" /> },
+  { id: "timetable",   label: "Timetable",        icon: <LayoutGrid className="w-4 h-4" /> },
 ];
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
@@ -923,13 +1451,16 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-6 py-8">
-        {activeTab === "admissions" && <AdmissionsTab />}
-        {activeTab === "news" && <NewsTab />}
-        {activeTab === "events" && <EventsTab />}
-        {activeTab === "gallery" && <GalleryTab />}
-        {activeTab === "staff" && <StaffTab />}
+        {activeTab === "admissions"  && <AdmissionsTab />}
+        {activeTab === "news"        && <NewsTab />}
+        {activeTab === "events"      && <EventsTab />}
+        {activeTab === "gallery"     && <GalleryTab />}
+        {activeTab === "staff"       && <StaffTab />}
         {activeTab === "school-life" && <SchoolLifeTab />}
-        {activeTab === "about" && <AboutTab />}
+        {activeTab === "about"       && <AboutTab />}
+        {activeTab === "results"     && <ResultsTab />}
+        {activeTab === "attendance"  && <AttendanceTab />}
+        {activeTab === "timetable"   && <TimetableTab />}
       </div>
     </div>
   );

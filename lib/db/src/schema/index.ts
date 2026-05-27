@@ -6,3 +6,6 @@ export * from "./admissions";
 export * from "./school_life";
 export * from "./site_content";
 export * from "./student_accounts";
+export * from "./results";
+export * from "./attendance";
+export * from "./timetable";
