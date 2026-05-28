@@ -11,6 +11,9 @@ import studentAuthRouter from "./student_auth";
 import resultsRouter from "./results";
 import attendanceRouter from "./attendance";
 import timetableRouter from "./timetable";
+import noticesRouter from "./notices";
+import schoolFeesRouter from "./school_fees";
+import uploadRouter from "./upload";
 
 const router: IRouter = Router();
 
@@ -26,5 +29,8 @@ router.use("/student", studentAuthRouter);
 router.use("/results", resultsRouter);
 router.use("/attendance", attendanceRouter);
 router.use("/timetable", timetableRouter);
+router.use("/notices", noticesRouter);
+router.use("/school-fees", schoolFeesRouter);
+router.use("/upload", uploadRouter);
 
 export default router;

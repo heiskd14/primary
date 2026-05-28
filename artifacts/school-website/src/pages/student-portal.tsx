@@ -22,7 +22,7 @@ function loadSession(): Session | null {
 function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
 /* ── TYPES ────────────────────────────────────────────────────────────── */
-type ResultRow = { subject: string; caScore: number; examScore: number; total: number; grade: string; remark: string };
+type ResultRow = { subject: string; ca1Score: number; ca2Score: number; caScore: number; examScore: number; total: number; grade: string; remark: string };
 type TimetableRow = { timeSlot: string; monday: string; tuesday: string; wednesday: string; thursday: string; friday: string; isBreak: number };
 type AttendanceSummary = { total: number; present: number; absent: number; late: number; percentage: number | null };
 type AttendanceRecord = { date: string; status: string; remark: string };
@@ -32,13 +32,7 @@ const DAY_LABELS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 const TERM_OPTIONS = ["First Term", "Second Term", "Third Term"];
 const CURRENT_YEAR = "2025/2026";
 
-const NOTICES = [
-  { date: "May 22, 2026", title: "Third Term Examination Timetable Released", type: "exam",     body: "All pupils should note that Third Term examinations commence on Monday, 8th June 2026. Examination timetables have been distributed in class. Please study hard and come prepared." },
-  { date: "May 19, 2026", title: "End-of-Year Prize-Giving Day",               type: "event",    body: "Parents and guardians are warmly invited to the annual Prize-Giving Day and Graduation Ceremony holding on Friday, 26th June 2026 at 10:00am. Please confirm attendance via the school office." },
-  { date: "May 14, 2026", title: "School Fees Reminder – Third Term",           type: "finance",  body: "This is a reminder that Third Term school fees are due by 30th May 2026. Kindly ensure all outstanding balances are cleared before the examination period begins." },
-  { date: "May 10, 2026", title: "Sports Day – 5th June 2026",                  type: "event",    body: "Inter-house Sports Day will be held on Friday, 5th June 2026 at the school field. Pupils are to come in their house colours. Parents are welcome to attend and cheer their children on!" },
-  { date: "May 5,  2026", title: "Scripture Union Fellowship – Every Friday",   type: "activity", body: "All pupils are reminded that SU fellowship holds every Friday at 7:30am before assembly. Come blessed and ready to worship." },
-];
+type NoticeItem = { id: number; title: string; body: string; type: string; publishedAt: string };
 
 function gradeColor(grade: string) {
   if (grade === "A") return GREEN;
@@ -73,6 +67,8 @@ export default function StudentPortal() {
   const [attendanceSummary, setAttendanceSummary] = useState<AttendanceSummary | null>(null);
   const [attendanceRows, setAttendanceRows] = useState<AttendanceRecord[]>([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [notices, setNotices] = useState<NoticeItem[]>([]);
+  const [noticesLoading, setNoticesLoading] = useState(false);
 
   useEffect(() => {
     const saved = loadSession();
@@ -85,7 +81,7 @@ export default function StudentPortal() {
     setResultsLoading(true);
     fetch(`/api/results/student/${session.id}?term=${encodeURIComponent(selectedTerm)}&academicYear=${encodeURIComponent(selectedYear)}`)
       .then(r => r.json())
-      .then((data: { subject: string; caScore: number; examScore: number; total: number; grade: string; remark: string }[]) => {
+      .then((data: ResultRow[]) => {
         setResults(Array.isArray(data) ? data : []);
       })
       .catch(() => setResults([]))
@@ -115,6 +111,17 @@ export default function StudentPortal() {
       .then((data: TimetableRow[]) => setTimetable(Array.isArray(data) ? data : []))
       .catch(() => setTimetable([]))
       .finally(() => setTimetableLoading(false));
+  }, [session]);
+
+  // Fetch notices when session is set
+  useEffect(() => {
+    if (!session) return;
+    setNoticesLoading(true);
+    fetch("/api/notices")
+      .then(r => r.json())
+      .then((data: NoticeItem[]) => setNotices(Array.isArray(data) ? data : []))
+      .catch(() => setNotices([]))
+      .finally(() => setNoticesLoading(false));
   }, [session]);
 
   function handleLogin(s: Session) { saveSession(s); setSession(s); }
@@ -386,7 +393,8 @@ export default function StudentPortal() {
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-100">
                         <th className="px-5 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">Subject</th>
-                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">CA (30)</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">1st CA (15)</th>
+                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">2nd CA (15)</th>
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">Exam (70)</th>
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">Total (100)</th>
                         <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wide">Grade</th>
@@ -397,7 +405,8 @@ export default function StudentPortal() {
                       {results.map((r, i) => (
                         <tr key={r.subject} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="px-5 py-3 font-medium text-gray-800">{r.subject}</td>
-                          <td className="px-4 py-3 text-center text-gray-600">{r.caScore}</td>
+                          <td className="px-4 py-3 text-center text-gray-600">{r.ca1Score ?? 0}</td>
+                          <td className="px-4 py-3 text-center text-gray-600">{r.ca2Score ?? 0}</td>
                           <td className="px-4 py-3 text-center text-gray-600">{r.examScore}</td>
                           <td className="px-4 py-3 text-center font-bold" style={{ color: gradeColor(r.grade) }}>{r.total}</td>
                           <td className="px-4 py-3 text-center">
@@ -411,7 +420,8 @@ export default function StudentPortal() {
                     <tfoot>
                       <tr className="border-t-2 border-gray-200" style={{ backgroundColor: "#f0f4ff" }}>
                         <td className="px-5 py-3 font-bold text-gray-800">Total / Average</td>
-                        <td className="px-4 py-3 text-center font-bold" style={{ color: NAVY }}>{results.reduce((s, r) => s + r.caScore, 0)}</td>
+                        <td className="px-4 py-3 text-center font-bold" style={{ color: NAVY }}>{results.reduce((s, r) => s + (r.ca1Score ?? 0), 0)}</td>
+                        <td className="px-4 py-3 text-center font-bold" style={{ color: NAVY }}>{results.reduce((s, r) => s + (r.ca2Score ?? 0), 0)}</td>
                         <td className="px-4 py-3 text-center font-bold" style={{ color: NAVY }}>{results.reduce((s, r) => s + r.examScore, 0)}</td>
                         <td className="px-4 py-3 text-center font-bold text-lg" style={{ color: NAVY }}>{avg}%</td>
                         <td colSpan={2} className="px-4 py-3 font-semibold text-gray-500 text-xs">Based on {results.length} subject{results.length !== 1 ? "s" : ""}</td>
@@ -502,26 +512,37 @@ export default function StudentPortal() {
         {activeTab === "notices" && (
           <div>
             <h2 className="font-bold text-gray-900 text-lg mb-6">School Notices & Announcements</h2>
-            <div className="space-y-4">
-              {NOTICES.map((notice, i) => {
-                const n = noticeStyle(notice.type);
-                return (
-                  <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                        style={{ backgroundColor: n.bg }}>{n.icon}</div>
-                      <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
-                          <h3 className="font-bold text-gray-900">{notice.title}</h3>
-                          <span className="text-xs text-gray-400 whitespace-nowrap">{notice.date}</span>
+            {noticesLoading ? (
+              <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-gray-300" /></div>
+            ) : notices.length === 0 ? (
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-sm py-16 text-center text-gray-400">
+                <Bell className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                <p className="font-semibold">No notices at this time</p>
+                <p className="text-xs mt-1">Check back later for school announcements.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notices.map(notice => {
+                  const n = noticeStyle(notice.type);
+                  const dateStr = notice.publishedAt ? new Date(notice.publishedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "";
+                  return (
+                    <div key={notice.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                          style={{ backgroundColor: n.bg }}>{n.icon}</div>
+                        <div className="flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
+                            <h3 className="font-bold text-gray-900">{notice.title}</h3>
+                            <span className="text-xs text-gray-400 whitespace-nowrap">{dateStr}</span>
+                          </div>
+                          <p className="text-sm text-gray-600 leading-relaxed">{notice.body}</p>
                         </div>
-                        <p className="text-sm text-gray-600 leading-relaxed">{notice.body}</p>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -610,10 +631,10 @@ function LoginPage({ onLogin }: { onLogin: (s: Session) => void }) {
             <p className="text-gray-400 text-sm mb-8">Enter your credentials to continue.</p>
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Username / Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input type="email" placeholder="surname.firstname@st.ttt.edu.ng" value={email}
+                  <input type="text" placeholder="e.g. king or surname.firstname@st.ttt.edu.ng" value={email}
                     onChange={e => setEmail(e.target.value)} required
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:border-transparent" />
                 </div>

@@ -8,6 +8,8 @@ export const resultsTable = pgTable("results", {
   academicYear: text("academic_year").notNull(),
   classLevel: text("class_level").notNull(),
   subject: text("subject").notNull(),
+  ca1Score: integer("ca1_score").default(0),
+  ca2Score: integer("ca2_score").default(0),
   caScore: integer("ca_score").default(0),
   examScore: integer("exam_score").default(0),
   total: integer("total").default(0),

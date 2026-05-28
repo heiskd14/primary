@@ -267,3 +267,89 @@ export async function sendPasswordResetEmail(opts: {
     html,
   });
 }
+
+export async function sendResultsUploadedEmail(opts: {
+  parentName: string;
+  parentEmail: string;
+  childFirstName: string;
+  childLastName: string;
+  classLevel: string;
+  term: string;
+  academicYear: string;
+}) {
+  const portalUrl = `${SCHOOL_URL}/student-portal`;
+  const subject = `📊 ${opts.term} Results Uploaded — ${opts.childFirstName} ${opts.childLastName}`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+      <div style="background-color:#1a237e;padding:24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">📊</div>
+        <h1 style="color:white;margin:0;font-size:20px;">Term Results Now Available</h1>
+        <p style="color:#bfcfff;margin:6px 0 0;font-size:14px;">Triple Tee Montessori Academy</p>
+      </div>
+      <div style="padding:28px;">
+        <p style="font-size:15px;color:#374151;margin:0 0 16px;">Dear <strong>${opts.parentName}</strong>,</p>
+        <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+          We are pleased to inform you that the academic results for <strong>${opts.childFirstName} ${opts.childLastName}</strong>
+          (${opts.classLevel}) have been uploaded to the student portal for <strong>${opts.term} ${opts.academicYear}</strong>.
+        </p>
+        <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+          Please log in to the student portal to view the full result sheet and performance summary.
+        </p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${portalUrl}" style="display:inline-block;background-color:#1a237e;color:white;font-weight:bold;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;">
+            View Results →
+          </a>
+        </div>
+        <p style="font-size:13px;color:#6b7280;margin-top:24px;line-height:1.6;">
+          📞 07036500419 &nbsp;|&nbsp; 08032348460<br/>✉️ tripleteeschools@gmail.com
+        </p>
+      </div>
+      ${FOOTER}
+    </div>`;
+  await transporter.sendMail({
+    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
+    to: opts.parentEmail,
+    subject,
+    html,
+  });
+}
+
+export async function sendTimetableUploadedEmail(opts: {
+  parentName: string;
+  parentEmail: string;
+  childFirstName: string;
+  classLevel: string;
+}) {
+  const portalUrl = `${SCHOOL_URL}/student-portal`;
+  const subject = `📅 Class Timetable Updated — ${opts.classLevel}`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+      <div style="background-color:#1a237e;padding:24px;text-align:center;">
+        <div style="font-size:40px;margin-bottom:8px;">📅</div>
+        <h1 style="color:white;margin:0;font-size:20px;">Timetable Updated</h1>
+        <p style="color:#bfcfff;margin:6px 0 0;font-size:14px;">Triple Tee Montessori Academy</p>
+      </div>
+      <div style="padding:28px;">
+        <p style="font-size:15px;color:#374151;margin:0 0 16px;">Dear <strong>${opts.parentName}</strong>,</p>
+        <p style="font-size:15px;color:#374151;margin:0 0 20px;line-height:1.6;">
+          The weekly class timetable for <strong>${opts.classLevel}</strong> has been updated.
+          Please log in to the student portal to view the current timetable for <strong>${opts.childFirstName}</strong>.
+        </p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${portalUrl}" style="display:inline-block;background-color:#1a237e;color:white;font-weight:bold;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;">
+            View Timetable →
+          </a>
+        </div>
+        <p style="font-size:13px;color:#6b7280;margin-top:24px;line-height:1.6;">
+          📞 07036500419 &nbsp;|&nbsp; 08032348460<br/>✉️ tripleteeschools@gmail.com
+        </p>
+      </div>
+      ${FOOTER}
+    </div>`;
+  await transporter.sendMail({
+    from: '"Triple Tee Montessori Academy" <okeyodekingdavid@gmail.com>',
+    to: opts.parentEmail,
+    subject,
+    html,
+  });
+}

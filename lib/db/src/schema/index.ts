@@ -9,3 +9,5 @@ export * from "./student_accounts";
 export * from "./results";
 export * from "./attendance";
 export * from "./timetable";
+export * from "./notices";
+export * from "./school_fees";

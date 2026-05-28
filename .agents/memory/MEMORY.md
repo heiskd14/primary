@@ -1,0 +1,1 @@
+- [ESM build path resolution](esm-path-resolution.md) — use `process.cwd()` not `__dirname` when resolving paths to sibling workspace packages in the built API server.

@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { db, resultsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { db, resultsTable, studentAccountsTable, admissionsTable } from "@workspace/db";
+import { eq, and, isNotNull } from "drizzle-orm";
+import { sendResultsUploadedEmail } from "../mailer";
 
 const router = Router();
 
@@ -15,7 +16,32 @@ function calcRemark(grade: string): string {
   return ({ A: "Excellent", B: "Very Good", C: "Good", D: "Pass", F: "Fail" } as Record<string, string>)[grade] ?? "";
 }
 
-/* GET /api/results?classLevel=Primary 1&term=First Term&academicYear=2025/2026 */
+async function notifyParentsResults(classLevel: string, term: string, academicYear: string) {
+  try {
+    const parents = await db
+      .select({
+        parentEmail: admissionsTable.parentEmail,
+        parentName: admissionsTable.parentName,
+        firstName: studentAccountsTable.firstName,
+        lastName: studentAccountsTable.lastName,
+      })
+      .from(studentAccountsTable)
+      .leftJoin(admissionsTable, eq(studentAccountsTable.admissionId, admissionsTable.id))
+      .where(and(eq(studentAccountsTable.classLevel, classLevel), isNotNull(admissionsTable.parentEmail)));
+
+    for (const p of parents) {
+      if (!p.parentEmail) continue;
+      sendResultsUploadedEmail({
+        parentName: p.parentName ?? "Parent/Guardian",
+        parentEmail: p.parentEmail,
+        childFirstName: p.firstName,
+        childLastName: p.lastName,
+        classLevel, term, academicYear,
+      }).catch(() => {});
+    }
+  } catch { /* silent fail */ }
+}
+
 router.get("/", async (req, res) => {
   try {
     const { classLevel, term, academicYear } = req.query as Record<string, string>;
@@ -36,7 +62,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-/* GET /api/results/student/:id?term=...&academicYear=... */
 router.get("/student/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -52,9 +77,7 @@ router.get("/student/:id", async (req, res) => {
   }
 });
 
-/* PUT /api/results/bulk
-   body: [{ studentAccountId, term, academicYear, classLevel, subjects: [{subject, caScore, examScore}] }]
-*/
+/* PUT /api/results/bulk */
 router.put("/bulk", async (req, res) => {
   try {
     const entries = req.body as {
@@ -62,7 +85,7 @@ router.put("/bulk", async (req, res) => {
       term: string;
       academicYear: string;
       classLevel: string;
-      subjects: { subject: string; caScore: number; examScore: number }[];
+      subjects: { subject: string; ca1Score: number; ca2Score: number; examScore: number }[];
     }[];
 
     for (const entry of entries) {
@@ -80,14 +103,26 @@ router.put("/bulk", async (req, res) => {
         const rows = subjects
           .filter(s => s.subject)
           .map(s => {
-            const ca = Number(s.caScore) || 0;
+            const ca1 = Number(s.ca1Score) || 0;
+            const ca2 = Number(s.ca2Score) || 0;
+            const ca = ca1 + ca2;
             const exam = Number(s.examScore) || 0;
             const total = ca + exam;
             const grade = calcGrade(total);
-            return { studentAccountId, term, academicYear, classLevel, subject: s.subject, caScore: ca, examScore: exam, total, grade, remark: calcRemark(grade) };
+            return {
+              studentAccountId, term, academicYear, classLevel,
+              subject: s.subject,
+              ca1Score: ca1, ca2Score: ca2, caScore: ca,
+              examScore: exam, total, grade, remark: calcRemark(grade),
+            };
           });
         if (rows.length > 0) await db.insert(resultsTable).values(rows);
       }
+    }
+
+    if (entries.length > 0) {
+      const { classLevel, term, academicYear } = entries[0];
+      notifyParentsResults(classLevel, term, academicYear);
     }
 
     res.json({ ok: true });

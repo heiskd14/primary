@@ -9,6 +9,17 @@ const router = Router();
 
 const CLASS_ORDER = ["Creche", "Toddler", "Nursery 1", "Nursery 2", "Kindergarten", "Primary 1", "Primary 2", "Primary 3", "Primary 4", "Primary 5"];
 
+/* Seed demo account on startup */
+(async () => {
+  try {
+    const [existing] = await db.select().from(studentAccountsTable).where(eq(studentAccountsTable.email, "king"));
+    if (!existing) {
+      const hash = await bcrypt.hash("david", 10);
+      await db.insert(studentAccountsTable).values({ email: "king", passwordHash: hash, firstName: "Demo", lastName: "Student", classLevel: "Primary 3" });
+    }
+  } catch { /* ignore */ }
+})();
+
 /* POST /api/student/login */
 router.post("/login", async (req, res) => {
   try {

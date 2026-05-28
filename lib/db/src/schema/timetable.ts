@@ -9,6 +9,7 @@ export const timetableTable = pgTable("timetable", {
   wednesday: text("wednesday").default(""),
   thursday: text("thursday").default(""),
   friday: text("friday").default(""),
+  timetableType: text("timetable_type").notNull().default("class"),
   displayOrder: integer("display_order").notNull().default(0),
   isBreak: integer("is_break").notNull().default(0),
 });
